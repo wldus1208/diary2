@@ -42,12 +42,18 @@
               <span class="id_save">ID저장</span>
             </p>
             <div>
-              <a href="" id="RegisterBtn" name="modal"
-                ><strong>[회원가입]</strong></a
-              >
-              <a>
+              <!-- @click.prevent="join" -->
+              <!-- 기본 동작을 방지하고 페이지 이동이 아닌 메소드 실행됨 -->
+              <a href="#" @click.prevent="showRegisterModal">
+                <strong>[회원가입]</strong>
+                <!-- RegisterModal 컴포넌트에 ref 속성 추가 -->
+              </a>
+              <register-modal ref="registerModal"></register-modal>
+              <!--  -->
+              <a href="#" @click.prevent="showFindAccountModal">
                 <strong>[아이디/비밀번호 찾기]</strong>
               </a>
+              <find-account-modal ref="findAccountModal"></find-account-modal>
             </div>
             <!-- Login Btn -->
             <a class="btn_login" id="btn_login" @click="fLoginProc">
@@ -62,9 +68,10 @@
 
 <script>
 //import Dashboard from "@/views/Dashboard.vue";
-import "../assets/css/admin/login.css";
-//import "https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap";
+import RegisterModal from "@/views/RegisterModal.vue";
+import FindAccountModal from "@/views/FindAccountModal.vue";
 
+import "../assets/css/admin/login.css";
 // import "../assets/js/common.js";
 export default {
   data: function () {
@@ -73,6 +80,10 @@ export default {
       pwd: "",
       saveId: false,
     };
+  },
+  components: {
+    RegisterModal,
+    FindAccountModal,
   },
   mounted: function () {
     let savedID = this.getCookie("EMP_ID");
@@ -85,6 +96,21 @@ export default {
     // 화살표 함수로 작성한 메소드의 경우 받아오지 못하는 현상이 발생한다.
     // ref :
     // http://1004lucifer.blogspot.com/2020/06/vuejs-methods-this-this.html
+
+    // 아이디 비밀번호 찾기 모달
+    showFindAccountModal() {
+      console.log("클릭");
+      if (this.$refs.findAccountModal) {
+        this.$refs.findAccountModal.showModal();
+      }
+    },
+    // 회원가입 모달
+    showRegisterModal() {
+      if (this.$refs.registerModal) {
+        this.$refs.registerModal.showModal();
+      }
+    },
+
     checkCode: function (event) {
       if (event.keyCode == 13) this.fLoginProc();
     },
