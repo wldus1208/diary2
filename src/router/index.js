@@ -22,6 +22,10 @@ const checkAuthed = function (to, from, next) {
           if ("/dashboard" + item.mnu_url.replace(".do", "") == to.fullPath) {
             throw new Error("authorized");
           }
+
+          if (item.mnu_dvs_cod == this.$store.loginInfo.userType) {
+            throw new Error("authorized");
+          }
         });
       });
     } catch (e) {
