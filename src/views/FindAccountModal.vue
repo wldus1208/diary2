@@ -8,24 +8,57 @@
           아이디 또는 비밀번호를 잊으셨나요? 등록하신 휴대폰 번호를
           입력해주세요.
         </p>
+        <!-- '휴대폰 번호' 입력 필드 -->
         <input
           type="text"
           v-model="phoneNumber"
-          placeholder="휴대폰 번호"
+          placeholder="휴대폰 번호 ('-' 제외)"
           class="modal-input"
+          required
+          maxlength="11"
         />
-        <button @click="findAccount" class="modal-button">찾기</button>
+        <!-- '인증 코드 보내기' 버튼 -->
+        <button @click.prevent="requestVerificationCode">
+          {{ verificationRequested ? "다시보내기" : "인증 코드 보내기" }}
+        </button>
+        <!-- 휴대폰 번호 입력 에러 메시지 표시 -->
+        <p v-if="hpError" class="error-message">{{ hpError }}</p>
+      </div>
+      <!-- 인증 코드 입력 필드. verificationRequested가 true일 때만 보여집니다. -->
+      <div class="form-group" v-if="verificationRequested">
+        <label for="verificationCode">인증 코드</label>
+        <input
+          type="text"
+          id="verificationCode"
+          name="verificationCode"
+          v-model="verificationCode"
+          required
+          @input="verifyCodeInput"
+          maxlength="6"
+        />
+        <!-- 인증 코드 검증 결과 메시지 표시 -->
+        <p v-if="codeVerificationMessage" :class="messageClass">
+          {{ codeVerificationMessage }}
+        </p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
-      isVisible: false,
-      phoneNumber: "",
+      isVisible: false, // 모달의 표시 상태
+      phoneNumber: "", // 사용자가 입력한 휴대폰 번호
+      verificationRequested: false, // 인증 코드 요청 여부
+      verificationCode: "", // 사용자가 입력한 인증 코드
+      codeVerificationMessage: "", // 인증 코드 검증 결과 메시지
+      messageClass: "", // 메시지 CSS 클래스 (성공/실패)
+      hpError: "", // 휴대폰 번호 입력 에러 메시지
+      correctVerificationCode: "", //서버로 부터 받은 인증 코드 번호
     };
   },
   methods: {
@@ -34,11 +67,101 @@ export default {
     },
     hideModal() {
       this.isVisible = false;
+      // 상태 초기화
+      this.phoneNumber = "";
+      this.verificationRequested = false;
+      this.verificationCode = "";
+      this.codeVerificationMessage = "";
+      this.messageClass = "";
+      this.hpError = "";
+      this.correctVerificationCode = "";
     },
-    findAccount() {
-      // 휴대폰 번호를 이용한 아이디/비밀번호 찾기 로직 구현
-      // 예: 휴대폰 번호를 서버로 전송하여 사용자 정보 조회 후 결과 처리
-      alert("휴대폰 번호로 아이디/비밀번호 찾기 기능 구현 필요");
+
+    requestVerificationCode() {
+      // 휴대폰 번호 유효성 검사
+      if (!this.phoneNumber || this.phoneNumber.length !== 11) {
+        this.hpError = "올바른 휴대폰 번호를 입력해주세요.";
+        return;
+      }
+
+      // 백엔드 API 호출하여 연락처 존재 여부 및 인증 코드 전송
+      axios
+        .post("/api/checkHp", { hp: this.phoneNumber })
+        .then((response) => {
+          // 연락처가 존재하는 경우 인증 코드 전송 로직
+          if (response.data === 1) {
+            // 인증 코드 전송 로직 (기존 로직 유지 또는 수정)
+            this.sendVerificationCode();
+          } else {
+            // 연락처가 존재하지 않는 경우 에러 메시지 표시
+            this.hpError = "회원가입이 안된 아이디입니다.";
+            this.verificationRequested = false; // 인증 요청 상태 초기화
+          }
+        })
+        .catch((error) => {
+          console.error("연락처 확인 중 오류 발생: ", error);
+          this.hpError = "연락처 확인 중 문제가 발생했습니다.";
+        });
+    },
+    // 인증번호
+    sendVerificationCode() {
+      axios
+        .post("/api/sendSMS", { hp: this.phoneNumber })
+        .then((response) => {
+          this.verificationRequested = true;
+          console.log("인증 코드가 전송되었습니다: ", response.data);
+          this.correctVerificationCode = response.data;
+          this.hpError = "";
+        })
+        .catch((error) => {
+          console.error("인증 코드 전송 중 오류 발생: ", error);
+          this.hpError = "인증 코드 전송 중 문제가 발생했습니다.";
+        });
+    },
+    verifyCodeInput() {
+      console.log("서버에서 받은 코드", this.correctVerificationCode);
+      console.log("내가 입력한 코드", this.verificationCode);
+
+      const inputCode = String(this.verificationCode).trim();
+      const correctCode = String(this.correctVerificationCode).trim();
+      // 인증 코드 검증 로직 (여기서는 예시로 직접 비교)
+      if (inputCode === correctCode) {
+        // 인증 코드가 일치하는 경우, 사용자 정보 조회 및 표시 로직
+        this.fetchUserInfo();
+      } else {
+        this.codeVerificationMessage = "잘못된 인증 코드입니다.";
+        this.messageClass = "error-message";
+      }
+    },
+
+    fetchUserInfo() {
+      // 백엔드 API 호출하여 사용자 정보 조회
+      axios
+        .post("/api/findAccount", { hp: this.phoneNumber })
+        .then((response) => {
+          console.log("response", response);
+          console.log("response.data.loginID", response.data.loginID);
+          // 사용자 정보 표시 로직
+          // 예: response.data에 사용자 아이디와 임시 비밀번호 또는 비밀번호 재설정 링크 포함
+          this.displayUserInfo(response.data);
+        })
+        .catch((error) => {
+          console.error("사용자 정보 조회 중 오류 발생: ", error);
+          this.codeVerificationMessage =
+            "사용자 정보 조회 중 문제가 발생했습니다.";
+          this.messageClass = "error-message";
+        });
+    },
+
+    displayUserInfo(userInfo) {
+      console.log("userInfo : ", userInfo);
+      // 사용자 정보를 모달 또는 페이지에 표시
+      // 예: 사용자 아이디와 비밀번호 재설정 링크
+      alert(
+        `아이디: ${userInfo.loginID}, 비밀번호 : ${userInfo.password} 
+        *마이페이지에서 비밀번호 변경 해주세요.*`
+      );
+      this.hideModal(); // 모달 닫기
     },
   },
 };
