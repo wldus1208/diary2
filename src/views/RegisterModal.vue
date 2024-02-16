@@ -187,7 +187,7 @@ export default {
         .post("/api/checkHp", { hp: this.userForm.hp })
         .then((response) => {
           // 중복 검사 결과에 따라 처리
-          if (response.data === 1) {
+          if (response.data >= 1) {
             // 중복된 경우 에러 메시지 설정 및 인증번호 요청 중단
             this.hpError = "이미 사용 중인 휴대폰 번호입니다.";
           } else {
