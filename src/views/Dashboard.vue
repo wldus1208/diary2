@@ -3,7 +3,7 @@
     <el-container>
       <el-header>
         <template v-if="loginInfo.loginId">
-          <div class="header">
+          <div class="header" @click="movePage">
             <span class="flex items-center">
               <el-avatar
                 class="mr-3"
@@ -66,6 +66,12 @@ export default {
     console.log(this.$store.state.loginInfo);
     this.type = this.$route.params.type;
     this.menu = this.$route.params.menu;
+  },
+  methods: {
+    movePage: async function () {
+      // 마이페이지 이동
+      this.$router.push("/dashboard/mypage/myPage");
+    },
   },
   components: { Menu },
 };
