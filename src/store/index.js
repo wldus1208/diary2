@@ -39,7 +39,11 @@ export default createStore({
       state.isPurcManager = false;
     },
   },
-  actions: {},
+  actions: {
+    logout({ commit }) {
+      commit("logout");
+    },
+  },
   modules: {},
   plugins: [createPersistedState()],
 });
