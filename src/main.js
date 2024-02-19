@@ -8,6 +8,7 @@ import Paginate from "vuejs-paginate-next";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
+//import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 
 // import twLib from "./assets/js/twLib";
 

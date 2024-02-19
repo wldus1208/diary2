@@ -60,7 +60,7 @@
           <!-- 에러 메시지가 있을 경우 표시 -->
           <!-- 인증 코드를 요청하는 버튼 -->
           <button @click.prevent="requestVerificationCode">
-            {{ verificationRequested ? "다시보내기" : "인증 코드 받기" }}
+            {{ verificationRequested ? "다시보내기" : "인증 코드 보내기" }}
           </button>
           <p v-if="hpError" class="error-message">{{ hpError }}</p>
         </div>
@@ -114,7 +114,7 @@ export default {
       },
     };
   },
-  // 중복 확인 로직
+  // 아이디 중복 확인 로직
   watch: {
     "userForm.loginID": function (newValue) {
       this.checkUserIdDuplicate(newValue);
@@ -161,7 +161,8 @@ export default {
         .post("/api/checkID", { loginID })
 
         .then((response) => {
-          if (response.data.isDuplicate) {
+          console.log("받은 값 : ", response.data);
+          if (response.data === 1) {
             this.isUserIdDuplicate = true;
             this.userIdDuplicateCheckMessage = "이미 사용 중인 아이디입니다.";
           } else {
@@ -181,9 +182,29 @@ export default {
         return; // 여기서 함수 종료
       }
 
+      // 휴대폰 번호 중복 검사 로직 구현
+      axios
+        .post("/api/checkHp", { hp: this.userForm.hp })
+        .then((response) => {
+          // 중복 검사 결과에 따라 처리
+          if (response.data >= 1) {
+            // 중복된 경우 에러 메시지 설정 및 인증번호 요청 중단
+            this.hpError = "이미 사용 중인 휴대폰 번호입니다.";
+          } else {
+            // 중복되지 않은 경우 인증번호 요청 로직 수행
+            this.sendVerificationCode();
+          }
+        })
+        .catch((error) => {
+          console.error("휴대폰 번호 중복 확인 중 오류 발생:", error);
+        });
+    },
+
+    // 인증번호 요청 로직을 별도의 메서드로 분리
+    sendVerificationCode() {
       // 기존 인증번호와 관련된 상태 초기화
       this.hpError = null; // 에러 메시지 초기화
-      this.verificationRequested = !this.verificationRequested; // 버튼 텍스트 변경
+      this.verificationRequested = true; // 버튼 텍스트 변경
       this.verificationCode = ""; // 사용자 입력 인증번호 초기화
       this.codeVerificationMessage = ""; // 인증번호 검증 메시지 초기화
       this.messageClass = ""; // 메시지 클래스 초기화
@@ -195,16 +216,11 @@ export default {
         .post("/api/sendSMS", this.userForm)
         .then((response) => {
           console.log(response.data);
-
-          // 인증번호 요청 성공 처리...
-          this.setVerificationCodeTimeout(); // 10초 후 만료 설정
-
-          this.verificationRequested = true;
-          this.correctVerificationCode = response.data;
-          // verificationRequested 상태를 true로 변경합니다.
+          this.correctVerificationCode = response.data; // 서버로부터 받은 인증 코드 저장
+          this.setVerificationCodeTimeout(); // 인증번호 만료 타이머 설정
         })
         .catch((error) => {
-          console.error("회원가입 에러:", error.response);
+          console.error("인증번호 요청 중 오류 발생:", error);
         });
     },
 
@@ -258,15 +274,23 @@ export default {
     },
 
     registerUser() {
+      // 아이디 중복 검사
+      if (this.isUserIdDuplicate) {
+        alert("이미 사용 중인 아이디입니다. 다른 아이디를 입력해주세요.");
+        return; // 중복 아이디가 있으므로 회원가입 로직 중단
+      }
       if (this.codeVerificationMessage != "인증 코드가 일치합니다.") {
         alert("휴대폰 인증을 해주세요.");
         return; // 회원가입 로직 중단
       }
+
       // 회원가입 로직
       axios
         .post("/api/register", this.userForm)
         .then((response) => {
           console.log(response.data);
+          // 회원 가입 성공 시 대시보드 홈으로 리다이렉트
+          this.$router.push("/dashboard/home");
           this.hideModal();
         })
         .catch((error) => {
