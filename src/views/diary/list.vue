@@ -50,12 +50,12 @@
           <div class="scroll-box">
             <el-timeline class="scroll">
               <el-timeline-item
-                v-for="(list, index) in lists"
-                :key="index"
+                v-for="list in lists"
+                :key="list.d_no"
                 placement="top"
               >
                 {{ formatCardDate(list.d_diarydt) }}
-                <el-card @click="detail(index)">
+                <el-card @click="detail(list.d_no)">
                   <div style="width: 1000px">
                     <h3>
                       <b>{{ list.d_title }}</b>
@@ -77,14 +77,16 @@
         <el-row v-show="radio == 'card'" class="scroll-box">
           <!-- 다이어리 목록 출력 부분 -->
           <el-row class="scroll" :gutter="12">
-            <el-col :span="8" v-for="(list, index) in lists" :key="index">
+            <el-col :span="8" v-for="list in lists" :key="list.d_no">
               <!-- 카드영역 -->
-              <div @click="detail(index)" class="card">
+              <div @click="detail(list.d_no)" class="card">
                 <el-card shadow="hover">
                   <div class="card-date">
                     {{ formatCardDate(list.d_diarydt) }}
                     <span>
-                      <el-icon @click="remove(index)"><CloseBold /></el-icon>
+                      <el-icon @click="remove(list.d_no)"
+                        ><CloseBold
+                      /></el-icon>
                     </span>
                   </div>
                   <div class="card-title">
@@ -173,6 +175,17 @@ export default {
       // 검색 입력란에 포커스 설정
       this.$refs.searchInput.focus();
       this.list();
+    },
+
+    // //목록의 자세히 보기 버튼
+    detail: async function (d_no) {
+      this.$router.push("/dashboard/diary/detail?d_no=" + d_no);
+      // this.$route.query.no
+    },
+
+    //작성 버튼
+    write: async function () {
+      this.$router.push("/dashboard/diary/diary");
     },
   },
 };
