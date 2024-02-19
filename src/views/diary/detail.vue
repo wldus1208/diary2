@@ -119,14 +119,25 @@ export default {
 
     remove() {
       if (confirm("삭제 하시겠습니까?")) {
-        this.$router.push("/dashboard/diary/list");
-        this.$message({
-          type: "info",
-          message: "일기를 삭제하였습니다.",
-        });
+        let params = new URLSearchParams();
+        params.append("d_no", this.pd_no);
+
+        // 화살표 함수를 사용하여 콜백 함수 내의 this를 컴포넌트 자체로 설정
+        this.axios
+          .post("/diary/delete.do", params)
+          .then((response) => {
+            console.log(response);
+            this.$router.push("/dashboard/diary/list");
+            this.$message({
+              type: "info",
+              message: "일기를 삭제하였습니다.",
+            });
+          })
+          .catch((error) => {
+            console.error("Error deleting diary:", error);
+          });
       }
     },
-
     formatCardDate(date) {
       if (!date || date.length !== 8) {
         return "날짜를 가져올 수 없습니다.";
