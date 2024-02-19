@@ -159,11 +159,9 @@ export default {
       params.append("noticeContent", this.state._content);
       //params.append("diarydt", this.diarydt);
 
-      this.axios
-        .post("/system/noticeSave.do", params)
-        .then(function (response) {
-          console.log(response);
-        });
+      this.axios.post("/diary/Save.do", params).then(function (response) {
+        console.log(response);
+      });
 
       if (this.$refs.titleInput) {
         this.$refs.titleInput.focus();
