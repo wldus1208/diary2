@@ -71,6 +71,7 @@
 //import Dashboard from "@/views/Dashboard.vue";
 import RegisterModal from "@/views/RegisterModal.vue";
 import FindAccountModal from "@/views/FindAccountModal.vue";
+import backStar from "@/components/system/backStar.vue";
 
 import "../assets/css/admin/login.css";
 // import "../assets/js/common.js";
@@ -85,6 +86,7 @@ export default {
   components: {
     RegisterModal,
     FindAccountModal,
+    backStar,
   },
   mounted: function () {
     let savedID = this.getCookie("EMP_ID");
