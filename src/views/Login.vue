@@ -4,7 +4,7 @@
       <div class="login_form shadow" align="center">
         <div class="login-form-right-side">
           <backStar></backStar>
-          <span class="typing">　D I A R Y　</span>
+          <span class="typing">D I A R Y</span>
         </div>
         <div class="login-form-left-side">
           <fieldset>
