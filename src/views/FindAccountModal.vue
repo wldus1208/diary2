@@ -8,6 +8,7 @@
           아이디 또는 비밀번호를 잊으셨나요? 등록하신 휴대폰 번호를
           입력해주세요.
         </p>
+        <!-- '휴대폰 번호' 입력 필드 -->
         <input
           type="text"
           v-model="phoneNumber"
@@ -84,6 +85,14 @@ export default {
       this.isUserInfoVisible = false;
       this.userInfo = {};
       this.isVisible = false;
+      // 상태 초기화
+      this.phoneNumber = "";
+      this.verificationRequested = false;
+      this.verificationCode = "";
+      this.codeVerificationMessage = "";
+      this.messageClass = "";
+      this.hpError = "";
+      this.correctVerificationCode = "";
     },
 
     requestVerificationCode() {

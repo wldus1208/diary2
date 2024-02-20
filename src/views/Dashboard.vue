@@ -32,6 +32,7 @@
               </div>
             </div>
           </div>
+          <!-- 로그아웃 -->
           <div class="flex items-center">
             <el-button type="primary" round @click="logoutproc()"
               >LOGOUT</el-button
@@ -63,6 +64,34 @@ export default {
       },
     };
   },
+
+  methods: {
+    moveDashBoard: async function () {
+      // 대쉬보드 이동
+      this.$router.push("/dashboard/home");
+    },
+    movePage: async function () {
+      // 마이페이지 이동
+      this.$router.push("/dashboard/mypage/myPage");
+    },
+
+    logoutproc() {
+      // 백엔드 로그아웃 API 호출
+      this.axios
+        .post("/api/logout")
+        .then(() => {
+          // Vuex 상태 초기화 또는 사용자 인증 관련 데이터 제거
+          this.$store.dispatch("logout");
+          this.$session.clear();
+          this.$router.push("/");
+          console.log("로그아웃 성공" + this.loginInfo);
+        })
+        .catch((error) => {
+          console.error("로그아웃 처리 중 에러 발생", error);
+        });
+    },
+  },
+
   mounted: function () {
     let loginInfo = this.$store.state.loginInfo;
     loginInfo.usrMnuAtrt.forEach((item) => {
@@ -87,16 +116,7 @@ export default {
     this.type = this.$route.params.type;
     this.menu = this.$route.params.menu;
   },
-  methods: {
-    moveDashBoard: async function () {
-      // 대쉬보드 이동
-      this.$router.push("/dashboard/home");
-    },
-    movePage: async function () {
-      // 마이페이지 이동
-      this.$router.push("/dashboard/mypage/myPage");
-    },
-  },
+
   components: { Menu },
 };
 </script>
@@ -111,15 +131,15 @@ header.el-header .header > .el-page-header__content > span {
   align-items: center;
 }
 
-header.el-header .header > .el-page-header__conten {
-  margin-top: 20px;
-}
-
 header.el-header {
   display: flex;
   background-color: rgba(93, 157, 255, 0.7);
   justify-content: space-between;
   align-items: center;
+
+  .header {
+    margin-top: 20px;
+  }
 }
 
 .el-main .el-page-header .el-page-header__header {
