@@ -3,16 +3,29 @@
         <el-container style="min-height: 100vh">
             <el-header>
                 <template v-if="loginInfo.loginId">
-                    <div class="header" @click="movePage">
-                        <span class="flex items-center">
-                            <el-avatar
-                                class="mr-3"
-                                :size="32"
-                                src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-                        </span>
-                        <span class="flex items-center">
-                            {{ loginInfo.loginId }}
-                        </span>
+                    <div class="el-page-header__header">
+                        <div class="el-page-header__left header">
+                            <el-icon :size="20" color="#FFFFFF" @click="moveDashBoard"
+                                ><House
+                            /></el-icon>
+                            <div class="el-page-header__title">HOME</div>
+
+                            <div
+                                class="el-divider el-divider--vertical"
+                                role="separator"
+                                style="--el-border-style: solid"></div>
+                            <div class="el-page-header__content">
+                                <span class="flex items-center" @click="movePage">
+                                    <el-avatar
+                                        class="mr-3"
+                                        :size="32"
+                                        src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+                                </span>
+                                <span @click="movePage">
+                                    {{ loginInfo.loginId }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div class="flex items-center">
                         <el-button type="primary" round @click="logoutproc()">LOGOUT</el-button>
@@ -65,6 +78,10 @@ export default {
         this.menu = this.$route.params.menu;
     },
     methods: {
+        moveDashBoard: async function () {
+            // 대쉬보드 이동
+            this.$router.push('/dashboard/home');
+        },
         movePage: async function () {
             // 마이페이지 이동
             this.$router.push('/dashboard/mypage/myPage');
@@ -75,8 +92,8 @@ export default {
 </script>
 <style>
 .header {
-    display: flex;
-    align-items: center;
+    justify-content: space-between;
+
     font-family: '나눔바른고딕', NanumBarunGothic;
     font-size: 18px;
     font-weight: bold;
