@@ -3,7 +3,6 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import Home from "../views/Dashboard.vue";
 import Login from "../views/Login.vue";
 import store from "../store/index.js";
-import DiaryInsert from "../views/DiaryInsert.vue";
 //import Content from "../views/Content.vue";
 
 const checkAuthed = function (to, from, next) {
@@ -67,11 +66,6 @@ const routes = [
     path: "/",
     name: "login",
     component: Login,
-  },
-  {
-    path: "/diary",
-    name: "diary",
-    component: DiaryInsert,
   },
 ];
 

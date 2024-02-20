@@ -7,6 +7,7 @@
           <el-button circle @click="back()">
             <el-icon :size="20" :color="color"> <Back /> </el-icon>
           </el-button>
+          <!-- 수정 -->
           <el-button class="el-icon-edit" circle @click="revise()">
             <el-icon :size="20" :color="color"> <EditPen /> </el-icon>
           </el-button>
@@ -21,9 +22,36 @@
           </el-row>
 
           <el-row>
-            <span>{{ lists.d_title }}</span>
-            <span class="weather-feel-icon"
-              >{{ lists.d_weather }} ({{ lists.d_mood }})</span
+            <span class="title">{{ lists.d_title }}</span>
+            <span class="icon">
+              <el-icon v-if="lists.d_weather === '1'"><Sunny /></el-icon>
+              <el-icon v-else-if="lists.d_weather === '2'"
+                ><MostlyCloudy
+              /></el-icon>
+              <el-icon v-else-if="lists.d_weather === '3'"><Pouring /></el-icon>
+              <el-icon v-else-if="lists.d_weather === '4'"
+                ><Lightning
+              /></el-icon>
+              (<span v-if="lists.d_mood === '기쁨'">
+                <img src="/images/happy.png" alt="기쁨" />
+                <span>{{ lists.d_mood }}</span>
+              </span>
+              <span v-else-if="lists.d_mood === '평범'">
+                <img src="/images/weird.png" alt="평범" />
+                <span>{{ lists.d_mood }}</span>
+              </span>
+              <span v-else-if="lists.d_mood === '우울'">
+                <img src="/images/sad.png" alt="우울" />
+                <span>{{ lists.d_mood }}</span>
+              </span>
+              <span v-else-if="lists.d_mood === '화남'">
+                <img src="/images/anger.png" alt="화남" />
+                <span>{{ lists.d_mood }}</span>
+              </span>
+              <span v-else-if="lists.d_mood === '놀람'">
+                <img src="/images/shock.png" alt="놀람" />
+                <span>{{ lists.d_mood }}</span> </span
+              >)</span
             >
           </el-row>
         </el-col>
@@ -114,7 +142,13 @@ export default {
     },
 
     revise() {
-      this.$router.push("/dashboard/diary/diary?no=" + this.$route.query.no);
+      this.$router.push({
+        path: "/dashboard/diary/DiaryInsert",
+        query: {
+          action: "U",
+          d_no: this.$route.query.d_no,
+        },
+      });
     },
 
     remove() {
@@ -127,11 +161,12 @@ export default {
           .post("/diary/delete.do", params)
           .then((response) => {
             console.log(response);
-            this.$router.push("/dashboard/diary/list");
             this.$message({
               type: "info",
               message: "일기를 삭제하였습니다.",
             });
+            this.$router.go(0);
+            this.$router.push("/dashboard/diary/list");
           })
           .catch((error) => {
             console.error("Error deleting diary:", error);
@@ -168,26 +203,40 @@ export default {
   border-radius: 5px;
 }
 .content-top {
-  margin-top: 2%;
   padding: auto;
 }
-.date,
-.weather-feel-icon {
+.date {
   color: gray;
+  font-size: 20px;
+  font-weight: bold;
 }
+
+.title {
+  margin-top: 4%;
+  font-size: 20px;
+}
+
+.icon {
+  color: gray;
+  margin-top: 2%;
+  font-size: 15px;
+}
+
+img {
+  width: 30px;
+  height: 30px;
+}
+
 .flex-container {
   display: flex;
   justify-content: flex-end;
-}
-.el-icon-edit {
-  background-color: #9c97f0;
-  color: white;
 }
 .content {
   height: 500px;
   overflow-y: auto;
   overflow-x: auto;
   width: 100%;
+  font-size: 15px;
 }
 .el-row {
   flex-direction: column;
