@@ -21,9 +21,28 @@
           </el-row>
 
           <el-row>
-            <span>{{ lists.d_title }}</span>
-            <span class="weather-feel-icon"
-              >{{ lists.d_weather }} ({{ lists.d_mood }})</span
+            <span class="title">{{ lists.d_title }}</span>
+            <span class="icon">
+              {{ lists.d_weather }} (<span v-if="lists.d_mood === '기쁨'">
+                <img src="/images/happy.png" alt="기쁨" />
+                <span>{{ lists.d_mood }}</span>
+              </span>
+              <span v-else-if="lists.d_mood === '평범'">
+                <img src="/images/weird.png" alt="평범" />
+                <span>{{ lists.d_mood }}</span>
+              </span>
+              <span v-else-if="lists.d_mood === '우울'">
+                <img src="/images/sad.png" alt="우울" />
+                <span>{{ lists.d_mood }}</span>
+              </span>
+              <span v-else-if="lists.d_mood === '화남'">
+                <img src="/images/anger.png" alt="화남" />
+                <span>{{ lists.d_mood }}</span>
+              </span>
+              <span v-else-if="lists.d_mood === '놀람'">
+                <img src="/images/shock.png" alt="놀람" />
+                <span>{{ lists.d_mood }}</span> </span
+              >)</span
             >
           </el-row>
         </el-col>
@@ -168,13 +187,30 @@ export default {
   border-radius: 5px;
 }
 .content-top {
-  margin-top: 2%;
   padding: auto;
 }
-.date,
-.weather-feel-icon {
+.date {
   color: gray;
+  font-size: 20px;
+  font-weight: bold;
 }
+
+.title {
+  margin-top: 4%;
+  font-size: 20px;
+}
+
+.icon {
+  color: gray;
+  margin-top: 2%;
+  font-size: 15px;
+}
+
+img {
+  width: 30px;
+  height: 30px;
+}
+
 .flex-container {
   display: flex;
   justify-content: flex-end;
@@ -188,6 +224,7 @@ export default {
   overflow-y: auto;
   overflow-x: auto;
   width: 100%;
+  font-size: 15px;
 }
 .el-row {
   flex-direction: column;
