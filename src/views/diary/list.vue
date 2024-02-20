@@ -65,16 +65,14 @@
                   </div>
                   <div class="card-content">
                     날씨:
-                    <el-icon v-if="list.d_weather === '맑음'"
-                      ><Sunny
-                    /></el-icon>
-                    <el-icon v-else-if="list.d_weather === '흐림'"
+                    <el-icon v-if="list.d_weather === '1'"><Sunny /></el-icon>
+                    <el-icon v-else-if="list.d_weather === '2'"
                       ><MostlyCloudy
                     /></el-icon>
-                    <el-icon v-else-if="list.d_weather === '눈/비'"
+                    <el-icon v-else-if="list.d_weather === '3'"
                       ><Pouring
                     /></el-icon>
-                    <el-icon v-else-if="list.d_weather === '천둥/번개'"
+                    <el-icon v-else-if="list.d_weather === '4'"
                       ><Lightning
                     /></el-icon>
                     | 기분:
@@ -150,6 +148,7 @@ export default {
       radio: "card",
       search: "",
       loginId: "",
+      action: "",
     };
   },
   mounted() {
@@ -224,7 +223,10 @@ export default {
 
     //작성 버튼
     write: async function () {
-      this.$router.push("/dashboard/diary/diary");
+      this.$router.push({
+        path: "/dashboard/diary/DiaryInsert",
+        query: { action: "I" },
+      });
     },
 
     remove(d_no) {
