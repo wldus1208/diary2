@@ -101,24 +101,31 @@ export default {
 };
 </script>
 <style>
-.header > .el-page-header__content > span {
+header.el-header .header > .el-page-header__content > span {
   justify-content: space-between;
   font-family: "나눔바른고딕", NanumBarunGothic;
   font-size: 18px;
   font-weight: bold;
   color: white;
   text-shadow: 1px 1px 1px gray;
-}
-.el-page-header__content {
-  display: flex;
   align-items: center;
 }
-.el-header {
+
+header.el-header {
   display: flex;
   background-color: rgba(93, 157, 255, 0.7);
   justify-content: space-between;
   align-items: center;
 }
+
+.el-main .el-page-header .el-page-header__header {
+  font-family: "나눔바른고딕", NanumBarunGothic;
+  line-height: 60px;
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0px 0px 20px;
+}
+
 .el-aside {
   overflow: hidden !important;
   border-right: solid 1px var(--el-menu-border-color);
