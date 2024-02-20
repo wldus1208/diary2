@@ -1,113 +1,127 @@
 <template>
-    <div class="common-layout" style="background-color: white">
-        <el-container style="min-height: 100vh">
-            <el-header>
-                <template v-if="loginInfo.loginId">
-                    <div class="el-page-header__header">
-                        <div class="el-page-header__left header">
-                            <el-icon :size="20" color="#FFFFFF" @click="moveDashBoard"
-                                ><House
-                            /></el-icon>
-                            <div class="el-page-header__title">HOME</div>
+  <div class="common-layout" style="background-color: white">
+    <el-container style="min-height: 100vh">
+      <el-header>
+        <template v-if="loginInfo.loginId">
+          <div class="el-page-header__header">
+            <div class="el-page-header__left header">
+              <div class="el-page-header__content" @click="moveDashBoard">
+                <el-icon :size="30" color="#FFFFFF" class="mr-3"
+                  ><House
+                /></el-icon>
+                <span>HOME</span>
+              </div>
 
-                            <div
-                                class="el-divider el-divider--vertical"
-                                role="separator"
-                                style="--el-border-style: solid"></div>
-                            <div class="el-page-header__content">
-                                <span class="flex items-center" @click="movePage">
-                                    <el-avatar
-                                        class="mr-3"
-                                        :size="32"
-                                        src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-                                </span>
-                                <span @click="movePage">
-                                    {{ loginInfo.loginId }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <el-button type="primary" round @click="logoutproc()">LOGOUT</el-button>
-                    </div>
-                </template>
-            </el-header>
-            <el-container>
-                <el-aside width="200px"><Menu></Menu></el-aside>
-                <el-main>
-                    <router-view :type="type" :menu="menu"></router-view>
-                </el-main>
-            </el-container>
-        </el-container>
-    </div>
+              <div
+                class="el-divider el-divider--vertical"
+                role="separator"
+                style="--el-border-style: solid"
+              ></div>
+
+              <div class="el-page-header__content">
+                <span class="flex items-center" @click="movePage">
+                  <el-avatar
+                    class="mr-3"
+                    :size="30"
+                    src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                  />
+                </span>
+                <span @click="movePage">
+                  {{ loginInfo.userNm }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center">
+            <el-button type="primary" round @click="logoutproc()"
+              >LOGOUT</el-button
+            >
+          </div>
+        </template>
+      </el-header>
+      <el-container>
+        <el-aside width="200px"><Menu></Menu></el-aside>
+        <el-main>
+          <router-view :type="type" :menu="menu"></router-view>
+        </el-main>
+      </el-container>
+    </el-container>
+  </div>
 </template>
 <script>
-import Menu from '@/components/leftMenu.vue';
+import Menu from "@/components/leftMenu.vue";
 
 export default {
-    data: function () {
-        return {
-            type: this.$route.params.type,
-            menu: this.$route.params.menu,
-            loginInfo: {
-                menulist: [],
-                loginId: '',
-            },
-        };
+  data: function () {
+    return {
+      type: this.$route.params.type,
+      menu: this.$route.params.menu,
+      loginInfo: {
+        menulist: [],
+        loginId: "",
+        userNm: "",
+      },
+    };
+  },
+  mounted: function () {
+    let loginInfo = this.$store.state.loginInfo;
+    loginInfo.usrMnuAtrt.forEach((item) => {
+      item.isShow = false;
+    });
+    console.table(this.$store.state.loginInfo);
+    this.loginInfo.menulist = loginInfo.usrMnuAtrt;
+    this.loginInfo.loginId = loginInfo.loginId;
+    this.loginInfo.userNm = loginInfo.userNm;
+  },
+  watch: {
+    $route(to) {
+      this.type = to.params.type;
+      this.menu = to.params.menu;
     },
-    mounted: function () {
-        let loginInfo = this.$store.state.loginInfo;
-        loginInfo.usrMnuAtrt.forEach((item) => {
-            item.isShow = false;
-        });
-        this.loginInfo.menulist = loginInfo.usrMnuAtrt;
-        this.loginInfo.loginId = loginInfo.loginId;
+  },
+  beforeRouteUpdate: function (to, from, next) {
+    this.$router.options.methods.checkAuthed(to, from, next);
+  },
+  created: function () {
+    console.log(this.$store.state.loginInfo);
+    this.type = this.$route.params.type;
+    this.menu = this.$route.params.menu;
+  },
+  methods: {
+    moveDashBoard: async function () {
+      // 대쉬보드 이동
+      this.$router.push("/dashboard/home");
     },
-    watch: {
-        $route(to) {
-            this.type = to.params.type;
-            this.menu = to.params.menu;
-        },
+    movePage: async function () {
+      // 마이페이지 이동
+      this.$router.push("/dashboard/mypage/myPage");
     },
-    beforeRouteUpdate: function (to, from, next) {
-        this.$router.options.methods.checkAuthed(to, from, next);
-    },
-    created: function () {
-        console.log(this.$store.state.loginInfo);
-        this.type = this.$route.params.type;
-        this.menu = this.$route.params.menu;
-    },
-    methods: {
-        moveDashBoard: async function () {
-            // 대쉬보드 이동
-            this.$router.push('/dashboard/home');
-        },
-        movePage: async function () {
-            // 마이페이지 이동
-            this.$router.push('/dashboard/mypage/myPage');
-        },
-    },
-    components: { Menu },
+  },
+  components: { Menu },
 };
 </script>
 <style>
-.header {
-    justify-content: space-between;
-
-    font-family: '나눔바른고딕', NanumBarunGothic;
-    font-size: 18px;
-    font-weight: bold;
-    color: white;
-    text-shadow: 1px 1px 1px gray;
+.header,
+.el-page-header__content > span {
+  justify-content: space-between;
+  font-family: "나눔바른고딕", NanumBarunGothic;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 1px gray;
+}
+.el-page-header__content {
+  display: flex;
+  align-items: center;
 }
 .el-header {
-    display: flex;
-    background-color: rgba(93, 157, 255, 0.7);
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  background-color: rgba(93, 157, 255, 0.7);
+  justify-content: space-between;
+  align-items: center;
 }
 .el-aside {
-    overflow: hidden !important;
-    border-right: solid 1px var(--el-menu-border-color);
+  overflow: hidden !important;
+  border-right: solid 1px var(--el-menu-border-color);
 }
 </style>
