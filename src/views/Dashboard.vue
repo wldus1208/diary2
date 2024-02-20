@@ -1,19 +1,36 @@
 <template>
   <div class="common-layout" style="background-color: white">
-    <el-container>
+    <el-container style="min-height: 100vh">
       <el-header>
         <template v-if="loginInfo.loginId">
-          <div class="header">
-            <span class="flex items-center">
-              <el-avatar
-                class="mr-3"
-                :size="32"
-                src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-              />
-            </span>
-            <span class="flex items-center">
-              {{ loginInfo.loginId }}
-            </span>
+          <div class="el-page-header__header">
+            <div class="el-page-header__left header">
+              <div class="el-page-header__content" @click="moveDashBoard">
+                <el-icon :size="30" color="#FFFFFF" class="mr-3"
+                  ><House
+                /></el-icon>
+                <span>HOME</span>
+              </div>
+
+              <div
+                class="el-divider el-divider--vertical"
+                role="separator"
+                style="--el-border-style: solid"
+              ></div>
+
+              <div class="el-page-header__content">
+                <span class="flex items-center" @click="movePage">
+                  <el-avatar
+                    class="mr-3"
+                    :size="30"
+                    src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                  />
+                </span>
+                <span @click="movePage">
+                  {{ loginInfo.userNm }}
+                </span>
+              </div>
+            </div>
           </div>
           <!-- 로그아웃 -->
           <div class="flex items-center">
@@ -43,11 +60,21 @@ export default {
       loginInfo: {
         menulist: [],
         loginId: "",
+        userNm: "",
       },
     };
   },
 
   methods: {
+    moveDashBoard: async function () {
+      // 대쉬보드 이동
+      this.$router.push("/dashboard/home");
+    },
+    movePage: async function () {
+      // 마이페이지 이동
+      this.$router.push("/dashboard/mypage/myPage");
+    },
+
     logoutproc() {
       // 백엔드 로그아웃 API 호출
       this.axios
@@ -70,8 +97,10 @@ export default {
     loginInfo.usrMnuAtrt.forEach((item) => {
       item.isShow = false;
     });
+    console.table(this.$store.state.loginInfo);
     this.loginInfo.menulist = loginInfo.usrMnuAtrt;
     this.loginInfo.loginId = loginInfo.loginId;
+    this.loginInfo.userNm = loginInfo.userNm;
   },
   watch: {
     $route(to) {
@@ -87,25 +116,36 @@ export default {
     this.type = this.$route.params.type;
     this.menu = this.$route.params.menu;
   },
+
   components: { Menu },
 };
 </script>
 <style>
-.header {
-  display: flex;
-  align-items: center;
+header.el-header .header > .el-page-header__content > span {
+  justify-content: space-between;
   font-family: "나눔바른고딕", NanumBarunGothic;
   font-size: 18px;
   font-weight: bold;
   color: white;
   text-shadow: 1px 1px 1px gray;
+  align-items: center;
 }
-.el-header {
+
+header.el-header {
   display: flex;
   background-color: rgba(93, 157, 255, 0.7);
   justify-content: space-between;
   align-items: center;
 }
+
+.el-main .el-page-header .el-page-header__header {
+  font-family: "나눔바른고딕", NanumBarunGothic;
+  line-height: 60px;
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0px 0px 20px;
+}
+
 .el-aside {
   overflow: hidden !important;
   border-right: solid 1px var(--el-menu-border-color);

@@ -159,7 +159,9 @@ export default {
 
               vm.$router.push("/dashboard/home");
             } else {
-              alert("ID 혹은 비밀번호가 틀립니다");
+              if (data.resultMsg.indexOf("회원가입") > -1)
+                alert(data.resultMsg);
+              else alert("ID 혹은 비밀번호가 틀립니다");
             }
           })
           .catch((error) => {
