@@ -101,8 +101,7 @@ export default {
 };
 </script>
 <style>
-.header,
-.el-page-header__content > span {
+.header > .el-page-header__content > span {
   justify-content: space-between;
   font-family: "나눔바른고딕", NanumBarunGothic;
   font-size: 18px;
