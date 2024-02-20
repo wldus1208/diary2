@@ -1,8 +1,10 @@
 <template>
   <div class="content">
-    <el-page-header>
+    <el-page-header @back="goBack">
       <template #content>
-        <span class="text-large font-600 mr-3"> 다이어리 작성 </span>
+        <span class="text-large font-600 mr-3"
+          >다이어리 {{ isCreating() ? "작성" : "수정" }}
+        </span>
       </template>
     </el-page-header>
 
@@ -11,12 +13,14 @@
         <p class="conTitle">
           <span>vue diary</span>
         </p>
-        <el-button name="Write" @click="focusInput">등록</el-button>
+        <el-button name="Write" @click="focusInput">{{
+          isCreating() ? "저장" : "수정 완료"
+        }}</el-button>
       </div>
     </div>
     <table>
       <tbody>
-        <tr @click="focusInput">
+        <tr>
           <th>제목</th>
           <td>
             <input
@@ -33,16 +37,16 @@
           <td class="vertical-align">
             <el-form-item prop="weather">
               <el-radio-group v-model="weather">
-                <el-radio-button label="sunny">
+                <el-radio-button label="1">
                   <el-icon size="20"><Sunny /></el-icon>
                 </el-radio-button>
-                <el-radio-button label="cloudy">
+                <el-radio-button label="2">
                   <el-icon size="20"><Cloudy /></el-icon>
                 </el-radio-button>
-                <el-radio-button label="pouring">
+                <el-radio-button label="3">
                   <el-icon size="20"><Pouring /></el-icon>
                 </el-radio-button>
-                <el-radio-button label="lightning">
+                <el-radio-button label="4">
                   <el-icon size="20"><Lightning /></el-icon>
                 </el-radio-button>
               </el-radio-group>
@@ -98,10 +102,13 @@ export default {
   },
   data: function () {
     return {
+      action: "",
       weather: "",
       idate: "", // 다이어리 등록 날짜
       title: "", // 제목
       mood: "", // 기분상태 5단계
+      lists: [],
+      loginId: "",
       state: {
         content: "",
         _content: "",
@@ -133,10 +140,62 @@ export default {
   },
   //////////////////////////////methods////////////////////////////////////////////////////////////
   mounted() {
-    this.focusInput();
+    this.action = this.$route.query.action || "";
+    console.log("Received action query parameter:", this.action);
+
+    const d_no = this.$route.query.d_no;
+    console.log("Received d_no query parameter:", d_no);
+
+    if (this.action === "U") {
+      let params = new URLSearchParams();
+      params.append("d_no", d_no);
+      console.log("params: ", d_no);
+
+      this.axios.post("/diary/detail.do", params).then((response) => {
+        console.log("response", response.data.result);
+
+        this.lists = {
+          d_no: response.data.result.d_no,
+          d_diarydt: response.data.result.d_diarydt,
+          d_mood: response.data.result.d_mood,
+          d_title: response.data.result.d_title,
+          d_weather: response.data.result.d_weather,
+          d_contents: response.data.result.d_contents,
+        };
+
+        if (this.lists.d_title) {
+          this.title = this.lists.d_title;
+          this.weather = this.lists.d_weather;
+          // 날짜 형식 변경
+          const dateParts = this.lists.d_diarydt.match(/(\d{4})(\d{2})(\d{2})/);
+          const date = new Date(
+            `${dateParts[1]}-${dateParts[2]}-${dateParts[3]}T00:00:00`
+          );
+          // YYYY-MM-DD 형식으로 변환
+          this.idate = date.toISOString().split("T")[0];
+
+          const moodMap = {
+            기쁨: "1",
+            평범: "2",
+            우울: "3",
+            화남: "4",
+            놀람: "5",
+          };
+          this.mood = moodMap[this.lists.d_mood];
+          this.state.content = this.lists.d_contents;
+        }
+      });
+    }
   },
 
   methods: {
+    isCreating() {
+      // 'action' 값이 'I'인 경우 true 반환, 그렇지 않으면 false 반환
+      return this.action === "I";
+    },
+    goBack() {
+      this.$router.go(-1); // 이전페이지 이동
+    },
     onEditorChange: function ({ quill, html, text }) {
       // 텍스트 편집기 내용이 변경될때 호출디는 콜백 함수 onEditorChange 정의
       this.state._content = html;
@@ -148,19 +207,36 @@ export default {
       console.log("############ onEditorChange   END ############");
     },
     focusInput() {
+      let loginInfo = this.$store.state.loginInfo;
+      this.loginId = loginInfo.loginId;
+
       let params = new URLSearchParams();
 
       console.log("this.state._content : ", this.state._content);
-      params.append("noticeTitle", this.title);
-      params.append("date", this.idate);
-      params.append("mood", this.mood);
-      params.append("action", "I");
-      params.append("weather", this.weather);
+      const d_no = this.$route.query.d_no;
+      params.append("d_no", d_no);
+      params.append("loginId", this.loginId);
+      params.append("d_title", this.title);
+      params.append("d_diarydt", this.formatDate(this.idate));
+      params.append("d_mood", this.mood);
+      params.append("d_contents", this.state.content);
+      params.append("action", this.action);
+      console.log("this.action", this.action);
+
+      params.append("d_weather", this.weather);
       params.append("noticeContent", this.state._content);
       //params.append("diarydt", this.diarydt);
 
-      this.axios.post("/diary/Save.do", params).then(function (response) {
+      this.axios.post("/diary/Save.do", params).then((response) => {
         console.log(response);
+        if (response.data.resultMsg == "SUCCESS") {
+          alert("일기를 저장하였습니다.");
+          this.$router.go(0);
+          this.$router.push("/dashboard/diary/list");
+        } else if (response.data.resultMsg == "UPDATED") {
+          alert("일기를 수정하였습니다.");
+          this.$router.go(0);
+        }
       });
 
       if (this.$refs.titleInput) {
@@ -168,7 +244,6 @@ export default {
       }
     },
     Write: async function goWritepage() {
-      this.action = "I";
       // await createRouter.push("/DiaryInsert.vue/"); //경로
     },
 
@@ -179,6 +254,12 @@ export default {
       selectedDate.setHours(0, 0, 0, 0); // 선택한 날짜의 시간을 00:00:00으로 설정
 
       return selectedDate > today;
+    },
+    formatDate(date) {
+      // 주어진 날짜를 Date 객체로 변환합니다.
+      const parsedDate = new Date(date);
+      // 원하는 형식에 맞게 문자열로 변환합니다.
+      return parsedDate.toISOString().slice(0, 10).replace(/-/g, "");
     },
   },
 };

@@ -7,6 +7,7 @@
           <el-button circle @click="back()">
             <el-icon :size="20" :color="color"> <Back /> </el-icon>
           </el-button>
+          <!-- 수정 -->
           <el-button class="el-icon-edit" circle @click="revise()">
             <el-icon :size="20" :color="color"> <EditPen /> </el-icon>
           </el-button>
@@ -23,7 +24,15 @@
           <el-row>
             <span class="title">{{ lists.d_title }}</span>
             <span class="icon">
-              {{ lists.d_weather }} (<span v-if="lists.d_mood === '기쁨'">
+              <el-icon v-if="lists.d_weather === '1'"><Sunny /></el-icon>
+              <el-icon v-else-if="lists.d_weather === '2'"
+                ><MostlyCloudy
+              /></el-icon>
+              <el-icon v-else-if="lists.d_weather === '3'"><Pouring /></el-icon>
+              <el-icon v-else-if="lists.d_weather === '4'"
+                ><Lightning
+              /></el-icon>
+              (<span v-if="lists.d_mood === '기쁨'">
                 <img src="/images/happy.png" alt="기쁨" />
                 <span>{{ lists.d_mood }}</span>
               </span>
@@ -133,7 +142,13 @@ export default {
     },
 
     revise() {
-      this.$router.push("/dashboard/diary/diary?no=" + this.$route.query.no);
+      this.$router.push({
+        path: "/dashboard/diary/DiaryInsert",
+        query: {
+          action: "U",
+          d_no: this.$route.query.d_no,
+        },
+      });
     },
 
     remove() {
@@ -146,11 +161,12 @@ export default {
           .post("/diary/delete.do", params)
           .then((response) => {
             console.log(response);
-            this.$router.push("/dashboard/diary/list");
             this.$message({
               type: "info",
               message: "일기를 삭제하였습니다.",
             });
+            this.$router.go(0);
+            this.$router.push("/dashboard/diary/list");
           })
           .catch((error) => {
             console.error("Error deleting diary:", error);
@@ -214,10 +230,6 @@ img {
 .flex-container {
   display: flex;
   justify-content: flex-end;
-}
-.el-icon-edit {
-  background-color: #9c97f0;
-  color: white;
 }
 .content {
   height: 500px;
