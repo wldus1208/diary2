@@ -1,26 +1,50 @@
 <template>
-  <div id="homeContent">
-    <div class="hero">
-      <img alt="Diary logo" src="../assets/diaryLogo.png" class="logo" />
-      <h1 class="hero-title">나만의 공간, 인터넷 일기장.</h1>
-      <p class="hero-subtitle">당신의 삶을 기록해 보세요.</p>
-      <el-button type="primary" class="start-button" @click="startDiary"
-        >일기 시작하기</el-button
-      >
-    </div>
+  <div>
+    <el-calendar v-model="Calendar" @click="handleDateClick" />
+    <el-dialog v-model="modalVisible" title="일정 추가">
+      <el-form label-width="120px">
+        <el-form-item label="일정 제목">
+          <el-input v-model="eventTitle" placeholder="일정 제목을 입력하세요" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="addEvent">확인</el-button>
+          <el-button @click="cancelEvent">취소</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Home",
-  methods: {
-    startDiary() {
-      this.$router.push({ path: "/dashboard/diary/list" });
-    },
+  name: "CalendarComponent",
+  data() {
+    return {
+      calendar: new Date(),
+      modalVisible: false,
+      eventTitle: "",
+    };
   },
-  created: function () {
-    console.log("home initiate");
+  methods: {
+    handleDateClick(date) {
+      // 날짜를 클릭하면 모달을 표시합니다.
+      console.log("Clicked Date:", date);
+      this.modalVisible = true;
+    },
+    addEvent() {
+      // 일정 추가 로직을 구현합니다.
+      console.log("일정 추가:", this.eventTitle);
+      // 모달을 닫습니다.
+      this.modalVisible = false;
+      // 입력 필드 초기화
+      this.eventTitle = "";
+    },
+    cancelEvent() {
+      // 모달을 닫습니다.
+      this.modalVisible = false;
+      // 입력 필드 초기화
+      this.eventTitle = "";
+    },
   },
 };
 </script>
