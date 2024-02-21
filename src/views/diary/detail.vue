@@ -165,7 +165,6 @@ export default {
               type: "info",
               message: "일기를 삭제하였습니다.",
             });
-            this.$router.go(0);
             this.$router.push("/dashboard/diary/list");
           })
           .catch((error) => {

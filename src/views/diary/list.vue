@@ -243,6 +243,7 @@ export default {
               type: "info",
               message: "일기를 삭제하였습니다.",
             });
+            this.$router.go(0);
           })
           .catch((error) => {
             console.error("Error deleting diary:", error);

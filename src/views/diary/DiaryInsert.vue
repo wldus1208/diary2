@@ -1,99 +1,120 @@
 <template>
-  <div class="content">
+  <div class="content" style="">
     <el-page-header @back="goBack">
       <template #content>
         <span class="text-large font-600 mr-3"
-          >다이어리 {{ isCreating() ? "작성" : "수정" }}
+          >일기 {{ isCreating() ? "작성" : "수정" }}
         </span>
       </template>
     </el-page-header>
 
-    <div class="content">
-      <div id="divNotice" class="notice-container">
-        <p class="conTitle">
-          <span>vue diary</span>
-        </p>
-        <el-button name="Write" @click="focusInput">{{
-          isCreating() ? "저장" : "수정 완료"
-        }}</el-button>
-      </div>
-    </div>
-    <table>
+    <table
+      style="
+        border-collapse: collapse;
+        width: 80%;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+      "
+    >
       <tbody>
         <tr>
-          <th>제목</th>
-          <td>
+          <th style="padding: 8px; border: none">제목</th>
+          <td style="padding: 8px; border: none">
             <input
               ref="titleInput"
               type="text"
               id="title"
               v-model="title"
               placeholder="제목을 입력하세요"
+              style="width: 100%; box-sizing: border-box; border: none"
             />
           </td>
         </tr>
         <tr>
-          <th>날씨선택</th>
-          <td class="vertical-align">
+          <th style="padding: 8px; border: none">날씨선택</th>
+          <td style="padding: 8px; border: none" class="vertical-align">
             <el-form-item prop="weather">
-              <el-radio-group v-model="weather">
+              <el-radio-group v-model="weather" class="weather">
                 <el-radio-button label="1">
-                  <el-icon size="20"><Sunny /></el-icon>
+                  <el-icon size="30"><Sunny /></el-icon>
                 </el-radio-button>
                 <el-radio-button label="2">
-                  <el-icon size="20"><Cloudy /></el-icon>
+                  <el-icon size="30"><Cloudy /></el-icon>
                 </el-radio-button>
                 <el-radio-button label="3">
-                  <el-icon size="20"><Pouring /></el-icon>
+                  <el-icon size="30"><Pouring /></el-icon>
                 </el-radio-button>
                 <el-radio-button label="4">
-                  <el-icon size="20"><Lightning /></el-icon>
+                  <el-icon size="30"><Lightning /></el-icon>
                 </el-radio-button>
               </el-radio-group>
             </el-form-item>
           </td>
         </tr>
         <tr>
-          <th>날짜선택</th>
-          <td class="vertical-align">
+          <th style="padding: 8px; border: none">날짜선택</th>
+          <td style="padding: 8px; border: none" class="vertical-align">
             <div class="demo-date-picker">
               <div class="block">
-                <input type="date" v-model="idate" />
+                <el-date-picker
+                  v-model="idate"
+                  type="date"
+                  placeholder="날짜를 선택하세요."
+                  :disabled-date="disabledDate"
+                  :shortcuts="shortcuts"
+                />
               </div>
             </div>
           </td>
         </tr>
         <tr>
-          <th>기분</th>
-          <td class="vertical-align mood-select">
-            <select v-model="mood">
-              <option value="1">기쁨</option>
-              <option value="2">평범</option>
-              <option value="3">우울</option>
-              <option value="4">화남</option>
-              <option value="5">놀람</option>
-            </select>
+          <th style="padding: 8px; border: none">기분</th>
+          <td
+            style="padding: 8px; border: none"
+            class="vertical-align mood-select"
+          >
+            <el-radio-group v-model="mood" class="mood">
+              <el-radio-button label="1">
+                <img src="/images/happy.png" alt="기쁨" />
+              </el-radio-button>
+              <el-radio-button label="2">
+                <img src="/images/weird.png" alt="평범" />
+              </el-radio-button>
+              <el-radio-button label="3">
+                <img src="/images/sad.png" alt="우울" />
+              </el-radio-button>
+              <el-radio-button label="4">
+                <img src="/images/anger.png" alt="화남" />
+              </el-radio-button>
+              <el-radio-button label="5">
+                <img src="/images/shock.png" alt="놀람" />
+              </el-radio-button>
+            </el-radio-group>
           </td>
         </tr>
 
-        <tr>
-          <th></th>
-        </tr>
+        <div id="divEditor">
+          <quill-editor
+            v-model:value="state.content"
+            :options="state.editorOption"
+            @change="onEditorChange($event)"
+          />
+        </div>
+
+        <span class="button" style="margin-bottom: 10px">
+          <el-button name="Write" @click="focusInput">{{
+            isCreating() ? "저장" : "수정 완료"
+          }}</el-button>
+          <el-button @click="reset">취소</el-button>
+        </span>
+        <br />
       </tbody>
     </table>
-
-    <div id="divEditor">
-      <quill-editor
-        v-model:value="state.content"
-        :options="state.editorOption"
-        @change="onEditorChange($event)"
-      />
-    </div>
   </div>
 </template>
 <script>
 import { quillEditor } from "vue3-quill";
-// import { reactive } from "vue";
 
 export default {
   name: "App",
@@ -109,6 +130,20 @@ export default {
       mood: "", // 기분상태 5단계
       lists: [],
       loginId: "",
+      shortcuts: [
+        {
+          text: "오늘",
+          value: new Date(),
+        },
+        {
+          text: "어제",
+          value: new Date(new Date().setDate(new Date().getDate() - 1)),
+        },
+        {
+          text: "1주 전",
+          value: new Date(new Date().setDate(new Date().getDate() - 7)),
+        },
+      ],
       state: {
         content: "",
         _content: "",
@@ -196,19 +231,14 @@ export default {
     goBack() {
       this.$router.go(-1); // 이전페이지 이동
     },
-    onEditorChange: function ({ quill, html, text }) {
+    onEditorChange: function ({ html }) {
       // 텍스트 편집기 내용이 변경될때 호출디는 콜백 함수 onEditorChange 정의
       this.state._content = html;
-      console.log("############ onEditorChange START ############");
-      console.log("quill          ::  ", quill);
-      console.log("html           ::  ", html);
-      console.log("text           ::  ", text);
-      console.log("state._content ::  ", this.state._content);
-      console.log("############ onEditorChange   END ############");
     },
     focusInput() {
       let loginInfo = this.$store.state.loginInfo;
       this.loginId = loginInfo.loginId;
+      console.log("this.action", this.loginId);
 
       let params = new URLSearchParams();
 
@@ -231,7 +261,6 @@ export default {
         console.log(response);
         if (response.data.resultMsg == "SUCCESS") {
           alert("일기를 저장하였습니다.");
-          this.$router.go(0);
           this.$router.push("/dashboard/diary/list");
         } else if (response.data.resultMsg == "UPDATED") {
           alert("일기를 수정하였습니다.");
@@ -277,7 +306,7 @@ td {
 }
 #divEditor,
 #divWeather {
-  padding: 20px;
+  padding: 10px;
 }
 .ql-container {
   height: 200px;
@@ -367,9 +396,39 @@ td {
 
 /* 기분 select box를 오른쪽에 정렬 */
 .mood-select {
-  width: calc(100% - 170px); /* 남은 공간 계산 */
   display: inline-block; /* inline-block으로 변경 */
   vertical-align: middle; /* 수직 정렬 */
-  margin-left: 50px; /* 왼쪽 마진 추가 */
+}
+
+img {
+  width: 30px;
+  height: 30px;
+}
+
+.el-radio-button {
+  border: none; /* 테두리 없앰 */
+  padding: 0; /* 패딩 없앰 */
+  background-color: transparent; /* 배경색을 투명으로 설정 */
+  opacity: 0.5;
+}
+
+/* el-radio-button 내부의 라벨에 대한 스타일 수정 */
+.el-radio-button__inner {
+  border: none; /* 테두리 없앰 */
+  padding: 10; /* 패딩 없앰 */
+  background-color: transparent; /* 배경색을 투명으로 설정 */
+}
+
+.el-radio-button.is-active,
+.el-radio-button.is-focus {
+  opacity: 1 !important;
+}
+
+.weather .el-radio-button.is-active .el-radio-button__inner {
+  background-color: gray;
+}
+
+.mood .el-radio-button.is-active .el-radio-button__inner {
+  background-color: transparent;
 }
 </style>
