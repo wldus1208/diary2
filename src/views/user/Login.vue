@@ -54,7 +54,13 @@
                 <strong>[아이디/비밀번호 찾기]</strong>
               </a>
               <find-account-modal ref="findAccountModal"></find-account-modal>
+              <!-- 소셜 로그인 버튼 -->
+              <a href="#" @click.prevent="showSocialLoginModal">
+                <strong>[소셜로그인]</strong>
+              </a>
+              <socialLogin-modal ref="SocialLoginModal"></socialLogin-modal>
             </div>
+
             <!-- Login Btn -->
             <a class="btn_login" id="btn_login" @click="fLoginProc">
               <strong>Login</strong>
@@ -68,10 +74,11 @@
 
 <script>
 //import Dashboard from "@/views/Dashboard.vue";
-import RegisterModal from "@/views/RegisterModal.vue";
-import FindAccountModal from "@/views/FindAccountModal.vue";
+import RegisterModal from "@/views/user/RegisterModal.vue";
+import FindAccountModal from "@/views/user/FindAccountModal.vue";
+import SocialLoginModal from "@/views/user/SocialLoginModal.vue";
 
-import "../assets/css/admin/login.css";
+import "@/assets/css/admin/login.css";
 // import "../assets/js/common.js";
 export default {
   data: function () {
@@ -84,6 +91,7 @@ export default {
   components: {
     RegisterModal,
     FindAccountModal,
+    SocialLoginModal,
   },
   mounted: function () {
     let savedID = this.getCookie("EMP_ID");
@@ -96,6 +104,14 @@ export default {
     // 화살표 함수로 작성한 메소드의 경우 받아오지 못하는 현상이 발생한다.
     // ref :
     // http://1004lucifer.blogspot.com/2020/06/vuejs-methods-this-this.html
+
+    // 소셜 로그인 모달을 표시합니다.
+    showSocialLoginModal() {
+      console.log("클릭");
+      if (this.$refs.SocialLoginModal) {
+        this.$refs.SocialLoginModal.showModal();
+      }
+    },
 
     // 아이디 비밀번호 찾기 모달
     showFindAccountModal() {
@@ -219,6 +235,33 @@ export default {
 </script>
 
 <style>
+/* 소셜 로그인 버튼 스타일 */
+.btn-social-login {
+  display: block; /* 블록 레벨 요소로 변경 */
+  width: 100%; /* 부모 요소의 전체 너비 */
+  margin: 10px 0; /* 위아래 마진 10px, 좌우 마진 0 */
+  padding: 10px; /* 패딩 10px */
+  font-size: 16px; /* 글자 크기 16px */
+  color: white; /* 글자 색상 흰색 */
+  border: none; /* 테두리 없음 */
+  border-radius: 5px; /* 테두리 둥글기 */
+  cursor: pointer; /* 마우스 커서 포인터 모양 */
+}
+
+/* Google 로그인 버튼 */
+.btn-social-login:nth-child(1) {
+  background-color: #db4437; /* 배경 색상 설정 */
+}
+
+/* Facebook 로그인 버튼 */
+.btn-social-login:nth-child(2) {
+  background-color: #3b5998; /* 배경 색상 설정 */
+}
+
+/* Kakao 로그인 버튼 */
+.btn-social-login:nth-child(3) {
+  background-color: #fee500; /* 배경 색상 설정 */
+}
 /* 애니메이션 */
 .typing {
   height: 5rem;

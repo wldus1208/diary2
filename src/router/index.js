@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 // import App from "../App.vue";
 import Home from "../views/Dashboard.vue";
-import Login from "../views/Login.vue";
+import Login from "../views/user/Login.vue";
 import store from "../store/index.js";
 //import Content from "../views/Content.vue";
 
