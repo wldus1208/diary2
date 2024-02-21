@@ -83,6 +83,7 @@ export default {
       console.log("네이버 로그인 URL:", naverLoginURL);
       window.location.href = naverLoginURL;
     },
+
     sendCodeToBackend(code, state) {
       // axios를 사용하여 백엔드로 코드와 상태 전송
 
