@@ -3,7 +3,8 @@
     <div id="background_board">
       <div class="login_form shadow" align="center">
         <div class="login-form-right-side">
-          <div class="typing">D I A R Y</div>
+          <backStar></backStar>
+          <span class="typing">D I A R Y</span>
         </div>
         <div class="login-form-left-side">
           <fieldset>
@@ -63,7 +64,7 @@
 
             <!-- Login Btn -->
             <a class="btn_login" id="btn_login" @click="fLoginProc">
-              <strong>Login</strong>
+              <strong>LOGIN</strong>
             </a>
           </fieldset>
         </div>
@@ -74,6 +75,7 @@
 
 <script>
 //import Dashboard from "@/views/Dashboard.vue";
+
 import RegisterModal from "@/views/user/RegisterModal.vue";
 import FindAccountModal from "@/views/user/FindAccountModal.vue";
 import SocialLoginModal from "@/views/user/SocialLoginModal.vue";
@@ -175,7 +177,9 @@ export default {
 
               vm.$router.push("/dashboard/home");
             } else {
-              alert("ID 혹은 비밀번호가 틀립니다");
+              if (data.resultMsg.indexOf("회원가입") > -1)
+                alert(data.resultMsg);
+              else alert("ID 혹은 비밀번호가 틀립니다");
             }
           })
           .catch((error) => {
@@ -264,18 +268,28 @@ export default {
 }
 /* 애니메이션 */
 .typing {
-  height: 5rem;
-  width: 23rem;
-  animation: typing 2s steps(50), blink 0.7s step-end infinite alternate;
+  width: 7em;
+  /*animation: typing 2s steps(7), blink 0.3s step-end infinite alternate;
+  border-right: 8px solid;*/
   white-space: nowrap;
-  border-right: 8px solid;
   overflow: hidden;
-  font-size: 6em;
   padding: 20px;
+  font-size: 6em;
   font-family: "Nanum Myeongjo", serif;
-  font-weight: 400;
   font-weight: 800;
+  background: -webkit-linear-gradient(white, #6c8cab);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
+#btn_login {
+  background: linear-gradient(#29234f, slategrey);
+}
+#btn_login > strong {
+  background: -webkit-linear-gradient(white, #6c8cab);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/*
 @keyframes typing {
   from {
     width: 0;
@@ -285,5 +299,16 @@ export default {
   50% {
     border-color: transparent;
   }
+}
+*/
+/* background */
+.login-form-right-side {
+  flex-direction: unset;
+}
+
+.login-form-right-side {
+  height: 100%;
+  background: linear-gradient(#29234f, slategrey);
+  overflow: hidden;
 }
 </style>

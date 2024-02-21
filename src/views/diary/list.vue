@@ -8,11 +8,11 @@
           <el-col :span="19">
             <!-- (타임라인,카드) 토글 -->
             <el-radio-group v-model="radio" class="radio-group">
-              <el-radio-button size="small" label="list"
-                ><el-icon size="20"><tickets /></el-icon
-              ></el-radio-button>
               <el-radio-button size="small" label="card"
                 ><el-icon size="20"><Menu /></el-icon
+              ></el-radio-button>
+              <el-radio-button size="small" label="list"
+                ><el-icon size="20"><tickets /></el-icon
               ></el-radio-button>
             </el-radio-group>
 
@@ -44,6 +44,68 @@
         <el-divider></el-divider
         ><!--구분선-->
 
+        <!-- 카드 형태 시작 -->
+        <el-row v-show="radio == 'card'" class="scroll-box">
+          <!-- 다이어리 목록 출력 부분 -->
+          <el-row class="scroll" :gutter="12">
+            <el-col :span="8" v-for="list in lists" :key="list.d_no">
+              <!-- 카드영역 -->
+              <div @click="detail(list.d_no)" class="card">
+                <el-card shadow="hover">
+                  <div class="card-date">
+                    {{ formatCardDate(list.d_diarydt) }}
+                    <span style="float: right">
+                      <el-icon @click.stop="remove(list.d_no)"
+                        ><CloseBold
+                      /></el-icon>
+                    </span>
+                  </div>
+                  <div class="card-title">
+                    <b>{{ list.d_title }}</b>
+                  </div>
+                  <div class="card-content">
+                    날씨:
+                    <el-icon v-if="list.d_weather === '1'"><Sunny /></el-icon>
+                    <el-icon v-else-if="list.d_weather === '2'"
+                      ><MostlyCloudy
+                    /></el-icon>
+                    <el-icon v-else-if="list.d_weather === '3'"
+                      ><Pouring
+                    /></el-icon>
+                    <el-icon v-else-if="list.d_weather === '4'"
+                      ><Lightning
+                    /></el-icon>
+                    | 기분:
+                    <span v-if="list.d_mood === '기쁨'">
+                      <img src="/images/happy.png" alt="기쁨" />
+                      <span>{{ list.d_mood }}</span>
+                    </span>
+                    <span v-else-if="list.d_mood === '평범'">
+                      <img src="/images/weird.png" alt="평범" />
+                      <span>{{ list.d_mood }}</span>
+                    </span>
+                    <span v-else-if="list.d_mood === '우울'">
+                      <img src="/images/sad.png" alt="우울" />
+                      <span>{{ list.d_mood }}</span>
+                    </span>
+                    <span v-else-if="list.d_mood === '화남'">
+                      <img src="/images/anger.png" alt="화남" />
+                      <span>{{ list.d_mood }}</span>
+                    </span>
+                    <span v-else-if="list.d_mood === '놀람'">
+                      <img src="/images/shock.png" alt="놀람" />
+                      <span>{{ list.d_mood }}</span>
+                    </span>
+                  </div>
+                </el-card>
+              </div>
+              <!-- 카드영역 끝 -->
+            </el-col>
+          </el-row>
+        </el-row>
+
+        <!-- 카드 형태 끝 -->
+
         <!-- 타임라인 형태 시작 -->
         <el-row v-show="radio == 'list'">
           <!-- 다이어리 목록 출력 부분 -->
@@ -72,37 +134,6 @@
           <!-- /다이어리 목록 출력 부분 -->
         </el-row>
         <!-- 타임라인 형태 끝 -->
-
-        <!-- 카드 형태 시작 -->
-        <el-row v-show="radio == 'card'" class="scroll-box">
-          <!-- 다이어리 목록 출력 부분 -->
-          <el-row class="scroll" :gutter="12">
-            <el-col :span="8" v-for="list in lists" :key="list.d_no">
-              <!-- 카드영역 -->
-              <div @click="detail(list.d_no)" class="card">
-                <el-card shadow="hover">
-                  <div class="card-date">
-                    {{ formatCardDate(list.d_diarydt) }}
-                    <span>
-                      <el-icon @click="remove(list.d_no)"
-                        ><CloseBold
-                      /></el-icon>
-                    </span>
-                  </div>
-                  <div class="card-title">
-                    <b>{{ list.d_title }}</b>
-                  </div>
-                  <div class="card-content">
-                    날씨: {{ list.d_weather }} | 기분: {{ list.d_mood }}
-                  </div>
-                </el-card>
-              </div>
-              <!-- 카드영역 끝 -->
-            </el-col>
-          </el-row>
-        </el-row>
-
-        <!-- 카드 형태 끝 -->
       </el-col>
     </el-row>
   </div>
@@ -114,19 +145,26 @@ export default {
   data() {
     return {
       lists: [],
-      radio: "list",
+      radio: "card",
       search: "",
+      loginId: "",
+      action: "",
     };
   },
   mounted() {
     this.list();
+    let loginInfo = this.$store.state.loginInfo;
+    this.loginId = loginInfo.loginId;
   },
   methods: {
     list: function () {
       let vm = this;
+      let loginInfo = this.$store.state.loginInfo;
+      this.loginId = loginInfo.loginId;
 
       let params = new URLSearchParams();
       params.append("title", this.search);
+      params.append("userId", this.loginId); // 사용자의 ID를 요청 파라미터에 추가
 
       this.axios
         .post("/diary/list.do", params)
@@ -185,7 +223,32 @@ export default {
 
     //작성 버튼
     write: async function () {
-      this.$router.push("/dashboard/diary/diary");
+      this.$router.push({
+        path: "/dashboard/diary/DiaryInsert",
+        query: { action: "I" },
+      });
+    },
+
+    remove(d_no) {
+      if (confirm("삭제 하시겠습니까?")) {
+        let params = new URLSearchParams();
+        params.append("d_no", d_no);
+
+        // 화살표 함수를 사용하여 콜백 함수 내의 this를 컴포넌트 자체로 설정
+        this.axios
+          .post("/diary/delete.do", params)
+          .then((response) => {
+            console.log(response);
+            this.$message({
+              type: "info",
+              message: "일기를 삭제하였습니다.",
+            });
+            this.$router.go(0);
+          })
+          .catch((error) => {
+            console.error("Error deleting diary:", error);
+          });
+      }
     },
   },
 };
@@ -208,12 +271,14 @@ export default {
   font-size: 13px;
   color: #9c97f0;
 }
-.card-title,
-.card-content {
+.card-title {
   margin-top: 5%;
+  color: black;
   font-size: 13px;
 }
 .card-content {
+  margin-top: 5%;
+  font-size: 15px;
   color: gray;
 }
 .scroll-box {
@@ -236,5 +301,9 @@ export default {
 }
 .el-row {
   align-items: baseline;
+}
+img {
+  width: 20px;
+  height: 20px;
 }
 </style>

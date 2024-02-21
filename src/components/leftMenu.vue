@@ -9,12 +9,12 @@
         v-for="list in loginInfo.menulist"
         :key="list.mnu_id"
       >
-        <el-sub-menu index="1">
+        <el-sub-menu>
           <template #title>
             <span>{{ list.mnu_nm }}</span>
           </template>
           <el-menu-item-group v-for="i in list.nodeList" :key="i.mnu_id">
-            <el-menu-item index="1-1"
+            <el-menu-item
               ><router-link :to="'/dashboard' + i.mnu_url.replace('.do', '')">{{
                 i.mnu_nm
               }}</router-link></el-menu-item
