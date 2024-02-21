@@ -5,7 +5,7 @@
 </template>
 <style>
 #stars {
-  content: "e";
+  content: " ";
   background: transparent;
   box-shadow: 1744px 122px #fff, 134px 1321px #fff, 92px 859px #fff,
     235px 1045px #fff, 366px 912px #fff, 491px 942px #fff, 14px 1831px #fff,
@@ -186,7 +186,7 @@
   animation: animStar 50s linear infinite;
 }
 #stars:after {
-  content: " ";
+  content: "  ";
   position: absolute;
   top: 2000px;
   width: 1px;
@@ -428,7 +428,7 @@
   animation: animStar 100s linear infinite;
 }
 #stars2:after {
-  content: " ";
+  content: "  ";
   position: absolute;
   top: 2000px;
   width: 2px;
@@ -520,7 +520,7 @@
   animation: animStar 150s linear infinite;
 }
 #stars3:after {
-  content: "e ";
+  content: "  ";
   position: absolute;
   top: 2000px;
   background: transparent;
