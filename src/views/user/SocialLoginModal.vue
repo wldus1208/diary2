@@ -57,11 +57,10 @@ export default {
 
   methods: {
     // 구글 로그인
-    // 구글 로그인
     googleLogin() {
       var clientId =
         "791029232576-26va45aofidk8vio4pfee8ashalguil3.apps.googleusercontent.com"; // 구글 클라이언트 ID
-      var redirectUri = "http://localhost:8080/#/dashboard/home"; // 구글에서 인증 후 리다이렉트할 URI
+      var redirectUri = "http://localhost:8080"; // 구글에서 인증 후 리다이렉트할 URI
       var scope = "email profile"; // 요청할 권한 범위
       var responseType = "code"; // 응답 타입
 
