@@ -65,6 +65,20 @@
           <p v-if="hpError" class="error-message">{{ hpError }}</p>
         </div>
 
+        <!-- 소셜로그인 구분 -->
+        <div class="form-group">
+          <label for="naver">네이버</label>
+          <input v-model="userForm.naver" />
+        </div>
+        <div class="form-group">
+          <label for="google">구글</label>
+          <input v-model="userForm.google" />
+        </div>
+        <div class="form-group">
+          <label for="kakao">카카오</label>
+          <input v-model="userForm.kakao" />
+        </div>
+
         <!-- 인증 코드 입력 필드, verificationRequested가 true일 때만 표시됩니다. -->
         <div class="form-group" v-if="verificationRequested">
           <label for="verificationCode">인증 코드</label>
@@ -110,7 +124,18 @@ export default {
         name: "",
         password: "",
         hp: "",
+        naver: "",
+        google: "",
+        kakao: "",
+
         // email: "",
+      },
+      props: {
+        name: String,
+        ph: String,
+        naver: String,
+        google: String,
+        kakao: String,
       },
     };
   },
@@ -290,7 +315,7 @@ export default {
         .then((response) => {
           console.log(response.data);
           // 회원 가입 성공 시 대시보드 홈으로 리다이렉트
-          this.$router.push("/dashboard/home");
+          this.$router.push("/");
           this.hideModal();
         })
         .catch((error) => {

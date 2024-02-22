@@ -24,16 +24,19 @@
         <img
           src="../../assets/kakao_login.png"
           alt="Kakao 로그인"
-          @click="naverLogin"
+          @click="kakaoLogin"
           class="social-login-image kakao"
         />
         <!-- 추가적인 소셜 로그인 버튼은 여기에 배치 -->
       </div>
     </div>
   </div>
+  <register-modal ref="registerModal"></register-modal>
 </template>
 
 <script>
+import RegisterModal from "@/views/user/RegisterModal.vue";
+
 export default {
   data() {
     return {
@@ -41,6 +44,9 @@ export default {
       code: "",
       state: "",
     };
+  },
+  components: {
+    RegisterModal,
   },
   //네이버 로그인 후 리다이렉트된 페이지에서 실행될 스크립트
   mounted() {
@@ -56,6 +62,33 @@ export default {
   },
 
   methods: {
+    // 카카오 로그인
+    kakaoLogin() {
+      window.Kakao.Auth.login({
+        scope: "profile_image, account_email",
+        success: this.getKakaoAccount,
+      });
+    },
+    getKakaoAccount() {
+      window.Kakao.API.request({
+        url: "http://localhost:8080",
+        success: (res) => {
+          const kakao_account = res.kakao_account;
+          const ninkname = kakao_account.profile.ninkname;
+          const email = kakao_account.email;
+          console.log("ninkname", ninkname);
+          console.log("email", email);
+
+          //로그인처리구현
+
+          alert("로그인 성공!");
+        },
+        fail: (error) => {
+          console.log(error);
+        },
+      });
+    },
+
     // 구글 로그인
     googleLogin() {
       var clientId =
@@ -90,23 +123,66 @@ export default {
       console.log("@@@@@@@@@@@@-->", code);
       console.log("@@@@@@@@@@@@-->", state);
 
-      let params = {
-        code: code,
-        state: state,
-      };
+      // let params = {
+      //   code: code,
+      //   state: state,
+      // };
 
-      console.log("@#$%@#@#", params);
+      // console.log("@#$%@#@#", params);
 
       this.axios
-        .post("/api/auth/naver", params)
+        .get("/api/auth/naver", { params: { code: code, state: state } })
         .then((response) => {
           // 인증 성공 처리
-          console.log("인증 성공", response);
+          console.log("인증 성공", response.data.login_result);
+          if (response.data.login_result === 0) {
+            alert("화원가입 후 이용해주세요");
+            // 모달에 이름과 전화번호를 설정하고 표시
+            this.showRegisterModal(response.data.name, response.data.mobile);
+          } else {
+            // 회원가입이 필요 없는 경우 (즉, 이미 회원인 경우)
+            // 휴대폰 번호로 회원 정보 조회 및 로그인 처리
+            const phoneNumber = response.data.mobile.replace(/-/g, ""); // 하이픈 제거
+            this.loginWithPhoneNumber(phoneNumber);
+          }
         })
         .catch((error) => {
           // 에러 처리
           console.error("인증 에러", error);
         });
+    },
+
+    // 휴대폰 번호로 로그인 처리하는 메소드
+    loginWithPhoneNumber(phoneNumber) {
+      this.axios
+        .post("/api/login", { ph: phoneNumber })
+        .then((loginResponse) => {
+          if (loginResponse.data.success) {
+            // 로그인 성공 처리
+            console.log("로그인 성공");
+            // 여기서 사용자를 로그인 상태로 처리합니다.
+            // 예: 사용자 대시보드로 리다이렉트
+          } else {
+            // 로그인 실패 처리
+            console.log("로그인 실패", loginResponse.data.message);
+            // 로그인 실패 관련 처리를 여기서 합니다.
+          }
+        })
+        .catch((loginError) => {
+          // 로그인 시도 중 에러 처리
+          console.error("로그인 에러", loginError);
+        });
+    },
+
+    // 모달 표시 메서드
+    showRegisterModal(name, phoneNumber) {
+      if (this.$refs.registerModal) {
+        // 휴대폰 번호에서 하이픈 제거
+        const cleanPhoneNumber = phoneNumber.replace(/-/g, "");
+        this.$refs.registerModal.userForm.name = name;
+        this.$refs.registerModal.userForm.hp = cleanPhoneNumber;
+        this.$refs.registerModal.showModal();
+      }
     },
 
     showModal() {
