@@ -66,15 +66,15 @@
         </div>
 
         <!-- 소셜로그인 구분 -->
-        <div class="form-group">
+        <div class="form-group" v-show="false">
           <label for="naver">네이버</label>
           <input v-model="userForm.naver" />
         </div>
-        <div class="form-group">
+        <div class="form-group" v-show="false">
           <label for="google">구글</label>
           <input v-model="userForm.google" />
         </div>
-        <div class="form-group">
+        <div class="form-group" v-show="false">
           <label for="kakao">카카오</label>
           <input v-model="userForm.kakao" />
         </div>
@@ -124,9 +124,9 @@ export default {
         name: "",
         password: "",
         hp: "",
-        naver: "",
-        google: "",
-        kakao: "",
+        naver: "N",
+        google: "N",
+        kakao: "N",
 
         // email: "",
       },

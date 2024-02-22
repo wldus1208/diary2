@@ -138,7 +138,11 @@ export default {
           if (response.data.login_result === 0) {
             alert("화원가입 후 이용해주세요");
             // 모달에 이름과 전화번호를 설정하고 표시
-            this.showRegisterModal(response.data.name, response.data.mobile);
+            this.showRegisterModal(
+              response.data.name,
+              response.data.mobile,
+              response.data.naver
+            );
           } else {
             // 회원가입이 필요 없는 경우 (즉, 이미 회원인 경우)
             // 휴대폰 번호로 회원 정보 조회 및 로그인 처리
@@ -155,31 +159,69 @@ export default {
     // 휴대폰 번호로 로그인 처리하는 메소드
     loginWithPhoneNumber(phoneNumber) {
       this.axios
-        .post("/api/login", { ph: phoneNumber })
+        .post("/api/login", { hp: phoneNumber })
         .then((loginResponse) => {
-          if (loginResponse.data.success) {
-            // 로그인 성공 처리
-            console.log("로그인 성공");
-            // 여기서 사용자를 로그인 상태로 처리합니다.
-            // 예: 사용자 대시보드로 리다이렉트
-          } else {
-            // 로그인 실패 처리
-            console.log("로그인 실패", loginResponse.data.message);
-            // 로그인 실패 관련 처리를 여기서 합니다.
+          console.log("loginResponse : ", loginResponse);
+          if (loginResponse.status == 200) {
+            // loginproc.do
+            this.axios
+              .post(
+                "/loginProc.do",
+                new URLSearchParams({
+                  lgn_Id: loginResponse.data.loginID,
+                  pwd: loginResponse.data.password,
+                })
+              )
+              .then((resp) => {
+                let data = resp.data;
+                console.log("data : ", data);
+                if (data.result == "SUCCESS") {
+                  this.$store.commit("logged", {
+                    loginId: data.loginId,
+                    userNm: data.userNm,
+                    userType: data.userType,
+                    serverName: data.serverName,
+                    usrMnuAtrt: data.usrMnuAtrt,
+                  });
+                  this.$store.commit("auth", { type: data.userType });
+
+                  // guide for making vue files
+                  data.usrMnuAtrt.forEach(function (item) {
+                    console.log(item.mnu_nm);
+                    item.nodeList.forEach(function (item) {
+                      let purl = item.mnu_url.replace(".do", ".vue");
+                      let vueFilePath = "@/views" + purl;
+                      console.log(
+                        "  메뉴명: " +
+                          item.mnu_nm +
+                          " || 파일경로 : " +
+                          vueFilePath
+                      );
+                    });
+                  });
+                  ////////////////////////////////
+
+                  this.$router.push("/dashboard/home");
+                } else {
+                  if (data.resultMsg.indexOf("회원가입") > -1)
+                    alert(data.resultMsg);
+                  else alert("ID 혹은 비밀번호가 틀립니다");
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+              });
           }
-        })
-        .catch((loginError) => {
-          // 로그인 시도 중 에러 처리
-          console.error("로그인 에러", loginError);
         });
     },
 
     // 모달 표시 메서드
-    showRegisterModal(name, phoneNumber) {
+    showRegisterModal(name, phoneNumber, naver) {
       if (this.$refs.registerModal) {
         // 휴대폰 번호에서 하이픈 제거
         const cleanPhoneNumber = phoneNumber.replace(/-/g, "");
         this.$refs.registerModal.userForm.name = name;
+        this.$refs.registerModal.userForm.naver = naver;
         this.$refs.registerModal.userForm.hp = cleanPhoneNumber;
         this.$refs.registerModal.showModal();
       }
