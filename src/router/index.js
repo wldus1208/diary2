@@ -3,12 +3,15 @@ import Home from "../views/Dashboard.vue";
 import Login from "../views/user/Login.vue";
 import store from "../store/index.js";
 
-// 접근 권한을 확인하는 함수
 const checkAuthed = function (to, from, next) {
+  // console.log(store.state);
+  // console.log(to);
   if (store.state.loginInfo == null) {
     alert("로그인이 필요합니다");
     return next("/");
   } else {
+    //console.log(to.fullPath);
+
     let isAuthorized = false;
 
     try {
@@ -18,13 +21,14 @@ const checkAuthed = function (to, from, next) {
             throw new Error("authorized");
           }
 
-          if (item.mnu_dvs_cod == store.state.loginInfo.userType) {
+          if (item.mnu_dvs_cod == this.$store.loginInfo.userType) {
             throw new Error("authorized");
           }
         });
       });
     } catch (e) {
       isAuthorized = true;
+      // console.log('user is authorized for this menu')
     }
 
     if (isAuthorized || to.fullPath == "/dashboard/home") {
