@@ -88,8 +88,10 @@ export default {
       // 백엔드 로그아웃 API 호출
       this.axios
         .post("/api/logout")
+
         .then(() => {
           // Vuex 상태 초기화 또는 사용자 인증 관련 데이터 제거
+          alert("로그아웃 되었습니다.");
           this.$store.dispatch("logout");
           this.$session.clear();
           this.$router.push("/");
