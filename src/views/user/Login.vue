@@ -61,7 +61,6 @@
               </a>
               <socialLogin-modal ref="SocialLoginModal"></socialLogin-modal>
             </div>
-
             <!-- Login Btn -->
             <a class="btn_login" id="btn_login" @click="fLoginProc">
               <strong>LOGIN</strong>
@@ -75,10 +74,10 @@
 
 <script>
 //import Dashboard from "@/views/Dashboard.vue";
-
 import RegisterModal from "@/views/user/RegisterModal.vue";
 import FindAccountModal from "@/views/user/FindAccountModal.vue";
 import SocialLoginModal from "@/views/user/SocialLoginModal.vue";
+import backStar from "@/components/system/backStar.vue";
 
 import "@/assets/css/admin/login.css";
 // import "../assets/js/common.js";
@@ -94,6 +93,7 @@ export default {
     RegisterModal,
     FindAccountModal,
     SocialLoginModal,
+    backStar,
   },
   mounted: function () {
     let savedID = this.getCookie("EMP_ID");
@@ -114,7 +114,6 @@ export default {
         this.$refs.SocialLoginModal.showModal();
       }
     },
-
     // 아이디 비밀번호 찾기 모달
     showFindAccountModal() {
       console.log("클릭");
@@ -239,38 +238,11 @@ export default {
 </script>
 
 <style>
-/* 소셜 로그인 버튼 스타일 */
-.btn-social-login {
-  display: block; /* 블록 레벨 요소로 변경 */
-  width: 100%; /* 부모 요소의 전체 너비 */
-  margin: 10px 0; /* 위아래 마진 10px, 좌우 마진 0 */
-  padding: 10px; /* 패딩 10px */
-  font-size: 16px; /* 글자 크기 16px */
-  color: white; /* 글자 색상 흰색 */
-  border: none; /* 테두리 없음 */
-  border-radius: 5px; /* 테두리 둥글기 */
-  cursor: pointer; /* 마우스 커서 포인터 모양 */
-}
-
-/* Google 로그인 버튼 */
-.btn-social-login:nth-child(1) {
-  background-color: #db4437; /* 배경 색상 설정 */
-}
-
-/* Facebook 로그인 버튼 */
-.btn-social-login:nth-child(2) {
-  background-color: #3b5998; /* 배경 색상 설정 */
-}
-
-/* Kakao 로그인 버튼 */
-.btn-social-login:nth-child(3) {
-  background-color: #fee500; /* 배경 색상 설정 */
-}
 /* 애니메이션 */
 .typing {
   width: 7em;
   /*animation: typing 2s steps(7), blink 0.3s step-end infinite alternate;
-  border-right: 8px solid;*/
+    border-right: 8px solid;*/
   white-space: nowrap;
   overflow: hidden;
   padding: 20px;
@@ -290,17 +262,17 @@ export default {
   -webkit-text-fill-color: transparent;
 }
 /*
-@keyframes typing {
-  from {
-    width: 0;
+  @keyframes typing {
+    from {
+      width: 0;
+    }
   }
-}
-@keyframes blink {
-  50% {
-    border-color: transparent;
+  @keyframes blink {
+    50% {
+      border-color: transparent;
+    }
   }
-}
-*/
+  */
 /* background */
 .login-form-right-side {
   flex-direction: unset;
