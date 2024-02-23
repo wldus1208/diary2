@@ -272,6 +272,7 @@ export default {
       this.axios
         .get(url)
         .then((response) => {
+          console.log(response);
           this.weather = response.data.weather[0].main;
           this.iconCode = response.data.weather[0].icon;
 
