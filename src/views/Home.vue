@@ -3,11 +3,17 @@
     <el-calendar v-model="Calendar" @click="handleDateClick" />
     <el-dialog v-model="modalVisible" title="일정 추가">
       <el-form label-width="120px">
-        <el-form-item label="일정 제목">
-          <el-input v-model="eventTitle" placeholder="일정 제목을 입력하세요" />
+        <el-form-item label="내용">
+          <el-input
+            type="textarea"
+            v-model="eventContent"
+            placeholder="일정 내용을 입력하세요"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="addEvent">확인</el-button>
+          <el-button name="Write" type="primary" @click="addEvent"
+            >저장</el-button
+          >
           <el-button @click="cancelEvent">취소</el-button>
         </el-form-item>
       </el-form>
@@ -22,28 +28,32 @@ export default {
     return {
       calendar: new Date(),
       modalVisible: false,
-      eventTitle: "",
+      eventContent: "",
     };
   },
   methods: {
-    handleDateClick(date) {
-      // 날짜를 클릭하면 모달을 표시합니다.
-      console.log("Clicked Date:", date);
-      this.modalVisible = true;
+    handleDateClick({ isDisabled, date }) {
+      // 날짜 박스를 클릭하고, 해당 날짜가 비활성 상태가 아닐 때만 모달을 표시합니다.
+      if (!isDisabled) {
+        console.log("Clicked Date:", date);
+        this.modalVisible = true;
+      }
     },
     addEvent() {
       // 일정 추가 로직을 구현합니다.
-      console.log("일정 추가:", this.eventTitle);
+      console.log("일정 추가:", this.eventContent);
       // 모달을 닫습니다.
       this.modalVisible = false;
       // 입력 필드 초기화
-      this.eventTitle = "";
+
+      this.eventContent = "";
     },
     cancelEvent() {
       // 모달을 닫습니다.
       this.modalVisible = false;
       // 입력 필드 초기화
-      this.eventTitle = "";
+
+      this.eventContent = "";
     },
   },
 };
