@@ -1,9 +1,7 @@
-import { createRouter, createWebHashHistory } from "vue-router";
-// import App from "../App.vue";
+import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Dashboard.vue";
 import Login from "../views/user/Login.vue";
 import store from "../store/index.js";
-//import Content from "../views/Content.vue";
 
 const checkAuthed = function (to, from, next) {
   // console.log(store.state);
@@ -42,6 +40,7 @@ const checkAuthed = function (to, from, next) {
   }
 };
 
+// 라우트 정의
 const routes = [
   {
     path: "/dashboard",
@@ -56,10 +55,7 @@ const routes = [
         component: () => import("../views/Home.vue"),
       },
     ],
-    beforeEnter: (to, from, next) => {
-      checkAuthed(to, from, next);
-    },
-
+    beforeEnter: checkAuthed, // 라우트 이동 전 권한 확인
     component: Home,
   },
   {
@@ -69,10 +65,10 @@ const routes = [
   },
 ];
 
+// 라우터 생성
 const router = createRouter({
-  history: createWebHashHistory(process.env.BASE_URL),
+  history: createWebHistory(process.env.BASE_URL), // 해시 모드 대신 히스토리 모드 사용
   routes,
-  methods: { checkAuthed },
 });
 
 export default router;

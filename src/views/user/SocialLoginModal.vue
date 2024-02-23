@@ -24,16 +24,19 @@
         <img
           src="../../assets/kakao_login.png"
           alt="Kakao 로그인"
-          @click="naverLogin"
+          @click="kakaoLogin"
           class="social-login-image kakao"
         />
         <!-- 추가적인 소셜 로그인 버튼은 여기에 배치 -->
       </div>
     </div>
   </div>
+  <register-modal ref="registerModal"></register-modal>
 </template>
 
 <script>
+import RegisterModal from "@/views/user/RegisterModal.vue";
+
 export default {
   data() {
     return {
@@ -41,6 +44,9 @@ export default {
       code: "",
       state: "",
     };
+  },
+  components: {
+    RegisterModal,
   },
   //네이버 로그인 후 리다이렉트된 페이지에서 실행될 스크립트
   mounted() {
@@ -56,12 +62,38 @@ export default {
   },
 
   methods: {
-    // 구글 로그인
+    // 카카오 로그인
+    kakaoLogin() {
+      window.Kakao.Auth.login({
+        scope: "profile_image, account_email",
+        success: this.getKakaoAccount,
+      });
+    },
+    getKakaoAccount() {
+      window.Kakao.API.request({
+        url: "http://localhost:8080",
+        success: (res) => {
+          const kakao_account = res.kakao_account;
+          const ninkname = kakao_account.profile.ninkname;
+          const email = kakao_account.email;
+          console.log("ninkname", ninkname);
+          console.log("email", email);
+
+          //로그인처리구현
+
+          alert("로그인 성공!");
+        },
+        fail: (error) => {
+          console.log(error);
+        },
+      });
+    },
+
     // 구글 로그인
     googleLogin() {
       var clientId =
         "791029232576-26va45aofidk8vio4pfee8ashalguil3.apps.googleusercontent.com"; // 구글 클라이언트 ID
-      var redirectUri = "http://localhost:8080/#/dashboard/home"; // 구글에서 인증 후 리다이렉트할 URI
+      var redirectUri = "http://localhost:8080"; // 구글에서 인증 후 리다이렉트할 URI
       var scope = "email profile"; // 요청할 권한 범위
       var responseType = "code"; // 응답 타입
 
@@ -84,29 +116,115 @@ export default {
       console.log("네이버 로그인 URL:", naverLoginURL);
       window.location.href = naverLoginURL;
     },
+
     sendCodeToBackend(code, state) {
       // axios를 사용하여 백엔드로 코드와 상태 전송
 
       console.log("@@@@@@@@@@@@-->", code);
       console.log("@@@@@@@@@@@@-->", state);
 
-      let params = {
-        code: code,
-        state: state,
-      };
+      // let params = {
+      //   code: code,
+      //   state: state,
+      // };
 
-      console.log("@#$%@#@#", params);
+      // console.log("@#$%@#@#", params);
 
       this.axios
-        .post("/api/auth/naver", params)
+        .get("/api/auth/naver", { params: { code: code, state: state } })
         .then((response) => {
           // 인증 성공 처리
-          console.log("인증 성공", response);
+          console.log("인증 성공", response.data.login_result);
+          if (response.data.login_result === 0) {
+            alert("화원가입 후 이용해주세요");
+            // 모달에 이름과 전화번호를 설정하고 표시
+            this.showRegisterModal(
+              response.data.name,
+              response.data.mobile,
+              response.data.naver
+            );
+          } else {
+            // 회원가입이 필요 없는 경우 (즉, 이미 회원인 경우)
+            // 휴대폰 번호로 회원 정보 조회 및 로그인 처리
+            const phoneNumber = response.data.mobile.replace(/-/g, ""); // 하이픈 제거
+            this.loginWithPhoneNumber(phoneNumber);
+          }
         })
         .catch((error) => {
           // 에러 처리
           console.error("인증 에러", error);
         });
+    },
+
+    // 휴대폰 번호로 로그인 처리하는 메소드
+    loginWithPhoneNumber(phoneNumber) {
+      this.axios
+        .post("/api/login", { hp: phoneNumber })
+        .then((loginResponse) => {
+          console.log("loginResponse : ", loginResponse);
+          if (loginResponse.status == 200) {
+            // loginproc.do
+            this.axios
+              .post(
+                "/loginProc.do",
+                new URLSearchParams({
+                  lgn_Id: loginResponse.data.loginID,
+                  pwd: loginResponse.data.password,
+                })
+              )
+              .then((resp) => {
+                let data = resp.data;
+                console.log("data : ", data);
+                if (data.result == "SUCCESS") {
+                  this.$store.commit("logged", {
+                    loginId: data.loginId,
+                    userNm: data.userNm,
+                    userType: data.userType,
+                    serverName: data.serverName,
+                    usrMnuAtrt: data.usrMnuAtrt,
+                  });
+                  this.$store.commit("auth", { type: data.userType });
+
+                  // guide for making vue files
+                  data.usrMnuAtrt.forEach(function (item) {
+                    console.log(item.mnu_nm);
+                    item.nodeList.forEach(function (item) {
+                      let purl = item.mnu_url.replace(".do", ".vue");
+                      let vueFilePath = "@/views" + purl;
+                      console.log(
+                        "  메뉴명: " +
+                          item.mnu_nm +
+                          " || 파일경로 : " +
+                          vueFilePath
+                      );
+                    });
+                  });
+                  ////////////////////////////////
+
+                  this.$router.push("/dashboard/home");
+                } else {
+                  if (data.resultMsg.indexOf("회원가입") > -1)
+                    alert(data.resultMsg);
+                  else alert("ID 혹은 비밀번호가 틀립니다");
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          }
+        });
+    },
+
+    // 모달 표시 메서드
+    showRegisterModal(name, phoneNumber, naver) {
+      if (this.$refs.registerModal) {
+        // 휴대폰 번호에서 하이픈 제거
+        const cleanPhoneNumber = phoneNumber.replace(/-/g, "");
+        this.$refs.registerModal.userForm.name = name;
+        this.$refs.registerModal.userForm.naver = naver;
+        this.$refs.registerModal.userForm.hp = cleanPhoneNumber;
+        this.$refs.registerModal.showModal();
+      }
     },
 
     showModal() {

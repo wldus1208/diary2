@@ -145,6 +145,7 @@ export default {
           )
           .then((resp) => {
             let data = resp.data;
+            console.log("data : ", data);
             if (data.result == "SUCCESS") {
               this.$store.commit("logged", {
                 loginId: data.loginId,
