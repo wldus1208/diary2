@@ -17,6 +17,9 @@
           <el-button name="Write" type="primary" @click="addEvent">{{
             btnT
           }}</el-button>
+          <el-button v-if="action === 'U'" @click="deleteEvent" type="danger"
+            >삭제</el-button
+          >
           <el-button @click="cancelEvent">취소</el-button>
         </el-form-item>
       </el-form>
@@ -133,6 +136,26 @@ export default {
       this.eventContent = "";
       // 클릭된 날짜 초기화
       this.clickedDate = "";
+    },
+    deleteEvent() {
+      // 삭제 이벤트
+      if (confirm("삭제 하시겠습니까?")) {
+        let params = new URLSearchParams();
+        params.append("s_date", this.formattedDate);
+
+        // 화살표 함수를 사용하여 콜백 함수 내의 this를 컴포넌트 자체로 설정
+        this.axios
+          .post("/home/delete.do", params)
+          .then((response) => {
+            console.log(response);
+            alert("삭제되었습니다.");
+            this.modalVisible = false;
+            this.$router.go(0);
+          })
+          .catch((error) => {
+            console.error("Error deleting:", error);
+          });
+      }
     },
     read(formattedDate) {
       let loginInfo = this.$store.state.loginInfo;
