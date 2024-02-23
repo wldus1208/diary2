@@ -1,8 +1,9 @@
 <template>
-  <div class="common-layout" style="background-color: white">
-    <el-container style="min-height: 100vh">
+  <div class="common-layout">
+    <el-container>
       <el-header>
         <template v-if="loginInfo.loginId">
+          <backStar></backStar>
           <div class="el-page-header__header">
             <div class="el-page-header__left header">
               <div class="el-page-header__content" @click="moveDashBoard">
@@ -34,7 +35,14 @@
           </div>
           <!-- 로그아웃 -->
           <div class="flex items-center">
-            <el-button type="primary" round @click="logoutproc()"
+            <!-- <el-button
+              type="primary"
+              color="#626aef"
+              round
+              @click="logoutproc()"
+              >LOGOUT</el-button
+            > -->
+            <el-button color="#182a53" round @click="logoutproc()"
               >LOGOUT</el-button
             >
           </div>
@@ -51,6 +59,7 @@
 </template>
 <script>
 import Menu from "@/components/leftMenu.vue";
+import backStar from "@/components/system/backStar.vue";
 
 export default {
   data: function () {
@@ -117,7 +126,7 @@ export default {
     this.menu = this.$route.params.menu;
   },
 
-  components: { Menu },
+  components: { Menu, backStar },
 };
 </script>
 <style>
@@ -133,9 +142,15 @@ header.el-header .header > .el-page-header__content > span {
 
 header.el-header {
   display: flex;
-  background-color: rgba(93, 157, 255, 0.7);
+  /* background-color: rgba(93, 157, 255, 0.7); */
   justify-content: space-between;
   align-items: center;
+  background: linear-gradient(#29234f, slategrey);
+  position: sticky;
+}
+
+header.el-header .el-page-header__header {
+  position: absolute;
 }
 
 .el-main .el-page-header .el-page-header__header {
@@ -149,5 +164,14 @@ header.el-header {
 .el-aside {
   overflow: hidden !important;
   border-right: solid 1px var(--el-menu-border-color);
+}
+
+section.el-container.is-vertical {
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.common-layout {
+  background-color: white;
 }
 </style>

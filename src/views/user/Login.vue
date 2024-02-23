@@ -3,7 +3,8 @@
     <div id="background_board">
       <div class="login_form shadow" align="center">
         <div class="login-form-right-side">
-          <div class="typing">D I A R Y</div>
+          <backStar></backStar>
+          <span class="typing">D I A R Y</span>
         </div>
         <div class="login-form-left-side">
           <fieldset>
@@ -54,10 +55,15 @@
                 <strong>[아이디/비밀번호 찾기]</strong>
               </a>
               <find-account-modal ref="findAccountModal"></find-account-modal>
+              <!-- 소셜 로그인 버튼 -->
+              <a href="#" @click.prevent="showSocialLoginModal">
+                <strong>[소셜로그인]</strong>
+              </a>
+              <socialLogin-modal ref="SocialLoginModal"></socialLogin-modal>
             </div>
             <!-- Login Btn -->
             <a class="btn_login" id="btn_login" @click="fLoginProc">
-              <strong>Login</strong>
+              <strong>LOGIN</strong>
             </a>
           </fieldset>
         </div>
@@ -68,10 +74,12 @@
 
 <script>
 //import Dashboard from "@/views/Dashboard.vue";
-import RegisterModal from "@/views/RegisterModal.vue";
-import FindAccountModal from "@/views/FindAccountModal.vue";
+import RegisterModal from "@/views/user/RegisterModal.vue";
+import FindAccountModal from "@/views/user/FindAccountModal.vue";
+import SocialLoginModal from "@/views/user/SocialLoginModal.vue";
+import backStar from "@/components/system/backStar.vue";
 
-import "../assets/css/admin/login.css";
+import "@/assets/css/admin/login.css";
 // import "../assets/js/common.js";
 export default {
   data: function () {
@@ -84,6 +92,8 @@ export default {
   components: {
     RegisterModal,
     FindAccountModal,
+    SocialLoginModal,
+    backStar,
   },
   mounted: function () {
     let savedID = this.getCookie("EMP_ID");
@@ -97,6 +107,13 @@ export default {
     // ref :
     // http://1004lucifer.blogspot.com/2020/06/vuejs-methods-this-this.html
 
+    // 소셜 로그인 모달을 표시합니다.
+    showSocialLoginModal() {
+      console.log("클릭");
+      if (this.$refs.SocialLoginModal) {
+        this.$refs.SocialLoginModal.showModal();
+      }
+    },
     // 아이디 비밀번호 찾기 모달
     showFindAccountModal() {
       console.log("클릭");
@@ -223,26 +240,47 @@ export default {
 <style>
 /* 애니메이션 */
 .typing {
-  height: 5rem;
-  width: 23rem;
-  animation: typing 2s steps(50), blink 0.7s step-end infinite alternate;
+  width: 7em;
+  /*animation: typing 2s steps(7), blink 0.3s step-end infinite alternate;
+    border-right: 8px solid;*/
   white-space: nowrap;
-  border-right: 8px solid;
   overflow: hidden;
-  font-size: 6em;
   padding: 20px;
+  font-size: 6em;
   font-family: "Nanum Myeongjo", serif;
-  font-weight: 400;
   font-weight: 800;
+  background: -webkit-linear-gradient(white, #6c8cab);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
-@keyframes typing {
-  from {
-    width: 0;
-  }
+#btn_login {
+  background: linear-gradient(#29234f, slategrey);
 }
-@keyframes blink {
-  50% {
-    border-color: transparent;
+#btn_login > strong {
+  background: -webkit-linear-gradient(white, #6c8cab);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/*
+  @keyframes typing {
+    from {
+      width: 0;
+    }
   }
+  @keyframes blink {
+    50% {
+      border-color: transparent;
+    }
+  }
+  */
+/* background */
+.login-form-right-side {
+  flex-direction: unset;
+}
+
+.login-form-right-side {
+  height: 100%;
+  background: linear-gradient(#29234f, slategrey);
+  overflow: hidden;
 }
 </style>

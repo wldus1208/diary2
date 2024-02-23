@@ -76,6 +76,7 @@
                 <el-date-picker
                   v-model="date"
                   type="date"
+                  :disabled-date="disabledDate"
                   placeholder="날짜를 선택하세요."
                 />
               </div>
@@ -107,7 +108,9 @@
           <td>
             <el-page-header @back="goBack">
               <template #content>
-                <span class="text-large font-600 mr-3"> Title </span>
+                <span class="text-large font-600 mr-3">
+                  타이틀 header 및 뒤로가기 재정의
+                </span>
               </template>
             </el-page-header>
           </td>
@@ -127,7 +130,7 @@ import { quillEditor } from "vue3-quill";
 export default {
   name: "App",
   components: {
-    quillEditor,
+    quillEditor, // 에디터
   },
   data() {
     return {
@@ -173,23 +176,19 @@ export default {
       ],
     };
   },
-  // setup() {
-  //     setTimeout(() => {
-  //         state.disabled = true;
-  //     }, 2000);
-  // },
   methods: {
-    getLocation: async function () {},
-    onEditorChange({ quill, html, text }) {
-      //console.log("editor change!", quill, html, text);
-      this.state._content = html;
-      console.log("############ onEditorChange START ############");
-      console.log("quill          ::  ", quill);
-      console.log("html           ::  ", html);
-      console.log("text           ::  ", text);
-      console.log("state._content ::  ", this.state._content);
-      console.log("############ onEditorChange   END ############");
+    // DatePicker disabledDate
+    disabledDate(time) {
+      return time.getTime() > Date.now();
     },
+    // Editor text -> html save
+    onEditorChange({ html }) {
+      // onEditorChange({ quill, html, text }) {
+
+      this.state._content = html;
+      console.log("editor change!", this.state._content);
+    },
+    // 뒤로가기 재정의
     goBack() {
       console.log("go back");
       this.$router.go(-1); // 이전페이지 이동

@@ -171,16 +171,6 @@ export default {
         });
     },
 
-    // displayUserInfo(userInfo) {
-    //   console.log("userInfo : ", userInfo);
-    //   // 사용자 정보를 모달 또는 페이지에 표시
-    //   // 예: 사용자 아이디와 비밀번호 재설정 링크
-    //   alert(
-    //     `아이디: ${userInfo.loginID}, 비밀번호 : ${userInfo.password}
-    //     *마이페이지에서 비밀번호 변경 해주세요.*`
-    //   );
-    //   this.hideModal(); // 모달 닫기
-    // },
     // 기존 메서드들
     displayUserInfo(userInfo) {
       this.userInfo = userInfo; // 사용자 정보 저장
