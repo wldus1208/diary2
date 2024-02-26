@@ -63,6 +63,15 @@ const routes = [
     path: "/",
     name: "login",
     component: Login,
+    beforeEnter: (to, from, next) => {
+      // 직접 스토어의 상태를 확인합니다.
+      if (store.state.loginInfo != null) {
+        alert("로그인 페이지는 로그아웃 후 이용 가능합니다.");
+        next("/dashboard/home");
+      } else {
+        next();
+      }
+    },
   },
 ];
 

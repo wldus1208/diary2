@@ -9,8 +9,20 @@ export default createStore({
     isDelvManager: false,
     isExecutive: false,
     isPurcManager: false,
+    isNaverLoggedIn: false,
+    isKakaoLoggedIn: false,
   },
   mutations: {
+    // 네이버 로그인 상태를 true로 설정
+    setNaverLoggedIn(state) {
+      state.isNaverLoggedIn = true;
+    },
+
+    // 카카오 로그인 상태를 true로 설정
+    setKakaoLoggedIn(state) {
+      state.isKakaoLoggedIn = true;
+    },
+
     logged(state, payload) {
       return (state.loginInfo = payload);
     },
@@ -37,6 +49,8 @@ export default createStore({
       state.isDelvManager = false;
       state.isExecutive = false;
       state.isPurcManager = false;
+      state.isKakaoLoggedIn = false;
+      state.isNaverLoggedIn = false;
     },
   },
   actions: {

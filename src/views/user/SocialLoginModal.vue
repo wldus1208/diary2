@@ -55,8 +55,12 @@ export default {
     this.state = urlParams.get("state");
     console.log("인증 코드 전송: ", this.code);
     console.log("인증 상태 전송: ", this.state);
-    window.Kakao.init("81900552da7c05acef6a1d7bfc7b42a1");
-    console.log(window.Kakao.isInitialized() ? "초기화 성공" : "초기화 실패");
+    // window.Kakao.init("81900552da7c05acef6a1d7bfc7b42a1");
+    // console.log(window.Kakao.isInitialized() ? "초기화 성공" : "초기화 실패");
+
+    if (!window.Kakao.isInitialized()) {
+      window.Kakao.init("81900552da7c05acef6a1d7bfc7b42a1");
+    }
 
     if (this.code && this.state) {
       this.sendCodeToBackend(this.code, this.state);
@@ -69,6 +73,8 @@ export default {
       window.Kakao.Auth.login({
         success: (authObj) => {
           console.log("카카오 로그인 성공", authObj);
+          // 카카오 로그인 상태를 true로 설정
+          this.$store.commit("setKakaoLoggedIn");
 
           window.Kakao.API.request({
             url: "/v2/user/me",
@@ -141,7 +147,7 @@ export default {
       console.log("네이버 로그인 URL:", naverLoginURL);
       window.location.href = naverLoginURL;
     },
-
+    // 네이버 로그인
     sendCodeToBackend(code, state) {
       // axios를 사용하여 백엔드로 코드와 상태 전송
 
@@ -160,6 +166,8 @@ export default {
         .then((response) => {
           // 인증 성공 처리
           console.log("인증 성공", response.data.login_result);
+          // 네이버 로그인 상태를 true로 설정
+          this.$store.commit("setNaverLoggedIn");
           if (response.data.login_result === 0) {
             alert("화원가입 후 이용해주세요");
             // 모달에 이름과 전화번호를 설정하고 표시
