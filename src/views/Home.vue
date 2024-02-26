@@ -1,13 +1,25 @@
 <template>
   <div>
-    <el-calendar v-model="Calendar" @click="handleDateClick" />
-    <el-dialog v-model="modalVisible" title="일정 추가">
+    <el-calendar v-model="value" @click="handleDateClick"> </el-calendar>
+    <el-dialog v-model="modalVisible" :title="title">
       <el-form label-width="120px">
-        <el-form-item label="일정 제목">
-          <el-input v-model="eventTitle" placeholder="일정 제목을 입력하세요" />
+        <el-form-item label="날짜">
+          <span>{{ formattedDate }}</span>
+        </el-form-item>
+        <el-form-item label="내용">
+          <el-input
+            type="textarea"
+            v-model="eventContent"
+            placeholder="일정 내용을 입력하세요"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="addEvent">확인</el-button>
+          <el-button name="Write" type="primary" @click="addEvent">{{
+            btnT
+          }}</el-button>
+          <el-button v-if="action === 'U'" @click="deleteEvent" type="danger"
+            >삭제</el-button
+          >
           <el-button @click="cancelEvent">취소</el-button>
         </el-form-item>
       </el-form>
@@ -20,30 +32,160 @@ export default {
   name: "CalendarComponent",
   data() {
     return {
+      value: "",
       calendar: new Date(),
       modalVisible: false,
-      eventTitle: "",
+      eventContent: "",
+      formattedDate: "",
+      clickedDate: "",
+      title: "",
+      btnT: "",
+      action: "",
     };
   },
   methods: {
-    handleDateClick(date) {
-      // 날짜를 클릭하면 모달을 표시합니다.
-      console.log("Clicked Date:", date);
-      this.modalVisible = true;
+    handleDateClick(event) {
+      const clickedElement = event.target;
+      // 클릭된 요소가 일자를 나타내는지 확인
+      if (clickedElement.classList.contains("el-calendar-day")) {
+        // 클릭된 날짜 가져오기
+        const clickedDate = clickedElement.querySelector("span").innerText;
+
+        // 달력의 연도와 월 가져오기
+        const calendarTitleElement = document.querySelector(
+          ".el-calendar__title"
+        );
+        let calendarTitleText = "";
+        if (calendarTitleElement) {
+          calendarTitleText = calendarTitleElement.innerText.trim();
+        }
+
+        // 클릭된 날짜와 달력의 제목을 합치기
+        const formattedDate = this.formatDate(clickedDate, calendarTitleText);
+        console.log("Formatted Date:", formattedDate);
+        // this.modalVisible = true;
+        // this.formattedDate = formattedDate; // 모달에 날짜 설정
+
+        this.read(formattedDate);
+      }
+    },
+
+    formatDate(day, monthYear) {
+      // monthYear에서 연도와 월 추출
+      const [year, month] = monthYear.split(" ");
+
+      // 클릭된 날짜, 연도, 월을 합쳐서 YYYY-MM-DD 형식으로 반환
+      return `${year}-${this.pad(this.monthToNumber(month))}-${this.pad(day)}`;
+    },
+    pad(value) {
+      return String(value).padStart(2, "0");
+    },
+    monthToNumber(month) {
+      const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      return months.indexOf(month) + 1;
     },
     addEvent() {
       // 일정 추가 로직을 구현합니다.
-      console.log("일정 추가:", this.eventTitle);
-      // 모달을 닫습니다.
-      this.modalVisible = false;
-      // 입력 필드 초기화
-      this.eventTitle = "";
+      console.log("일정 추가:", this.eventContent, "날짜:", this.formattedDate);
+      if (this.eventContent == "") {
+        alert("일정을 입력해주세요.");
+        return false;
+      }
+
+      let loginInfo = this.$store.state.loginInfo;
+      this.loginId = loginInfo.loginId;
+
+      let params = new URLSearchParams();
+
+      params.append("loginId", this.loginId);
+      params.append("s_date", this.formattedDate);
+      params.append("s_contents", this.eventContent);
+      params.append("action", this.action);
+
+      this.axios.post("/home/Save.do", params).then((response) => {
+        console.log(response);
+        if (response.data.resultMsg == "SUCCESS") {
+          alert("일정을 저장하였습니다.");
+          this.modalVisible = false;
+        } else if (response.data.resultMsg == "UPDATED") {
+          alert("일정을 수정하였습니다.");
+          // this.$router.go(0);
+          this.modalVisible = true;
+        } else {
+          alert("실패했습니다.");
+        }
+      });
     },
     cancelEvent() {
       // 모달을 닫습니다.
       this.modalVisible = false;
       // 입력 필드 초기화
-      this.eventTitle = "";
+      this.eventContent = "";
+      // 클릭된 날짜 초기화
+      this.clickedDate = "";
+    },
+    deleteEvent() {
+      // 삭제 이벤트
+      if (confirm("삭제 하시겠습니까?")) {
+        let params = new URLSearchParams();
+        params.append("s_date", this.formattedDate);
+
+        // 화살표 함수를 사용하여 콜백 함수 내의 this를 컴포넌트 자체로 설정
+        this.axios
+          .post("/home/delete.do", params)
+          .then((response) => {
+            console.log(response);
+            alert("삭제되었습니다.");
+            this.modalVisible = false;
+            this.$router.go(0);
+          })
+          .catch((error) => {
+            console.error("Error deleting:", error);
+          });
+      }
+    },
+    read(formattedDate) {
+      let loginInfo = this.$store.state.loginInfo;
+      this.loginId = loginInfo.loginId;
+
+      let params = new URLSearchParams();
+
+      params.append("loginId", this.loginId);
+      params.append("s_date", formattedDate);
+      this.axios.post("/home/read.do", params).then((response) => {
+        if (response.data.resultMsg == "SUCCESS") {
+          console.log(response);
+          const eventData = response.data;
+          this.eventContent = eventData.contents;
+          // 모달을 열고 날짜 전달
+          this.modalVisible = true;
+          this.formattedDate = formattedDate; // 모달에 날짜 설정
+          this.eventContent = response.data.result.s_contents;
+          this.title = "일정 수정";
+          this.btnT = "수정";
+          this.action = "U";
+        } else {
+          // DB에서 값이 없으면 일정을 등록할 수 있는 모달을 열도록 처리
+          this.modalVisible = true;
+          this.formattedDate = formattedDate; // 모달에 날짜 설정
+          this.title = "일정 추가";
+          this.btnT = "추가";
+          this.action = "I";
+        }
+      });
     },
   },
 };

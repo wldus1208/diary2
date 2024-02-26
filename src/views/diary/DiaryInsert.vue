@@ -201,13 +201,7 @@ export default {
         if (this.lists.d_title) {
           this.title = this.lists.d_title;
           this.weather = this.lists.d_weather;
-          // 날짜 형식 변경
-          const dateParts = this.lists.d_diarydt.match(/(\d{4})(\d{2})(\d{2})/);
-          const date = new Date(
-            `${dateParts[1]}-${dateParts[2]}-${dateParts[3]}T00:00:00`
-          );
-          // YYYY-MM-DD 형식으로 변환
-          this.idate = date.toISOString().split("T")[0];
+          this.idate = this.lists.d_diarydt;
 
           const moodMap = {
             기쁨: "1",
@@ -236,9 +230,11 @@ export default {
       this.state._content = html;
     },
     focusInput() {
+      if (!this.valid()) {
+        return false;
+      }
       let loginInfo = this.$store.state.loginInfo;
       this.loginId = loginInfo.loginId;
-      console.log("this.action", this.loginId);
 
       let params = new URLSearchParams();
 
@@ -247,7 +243,12 @@ export default {
       params.append("d_no", d_no);
       params.append("loginId", this.loginId);
       params.append("d_title", this.title);
-      params.append("d_diarydt", this.formatDate(this.idate));
+      if (this.isCreating()) {
+        params.append("d_diarydt", this.formatDate(this.idate));
+      } else {
+        params.append("d_diarydt", this.formatDate2(this.idate));
+        console.log(this.formatDate2(this.idate));
+      }
       params.append("d_mood", this.mood);
       params.append("d_contents", this.state.content);
       params.append("action", this.action);
@@ -265,12 +266,12 @@ export default {
         } else if (response.data.resultMsg == "UPDATED") {
           alert("일기를 수정하였습니다.");
           this.$router.go(0);
+        } else if (response.data.resultMsg == "FAILED") {
+          alert("해당 날짜에 해당하는 일기가 존재합니다.");
+        } else {
+          alert("실패했습니다.");
         }
       });
-
-      if (this.$refs.titleInput) {
-        this.$refs.titleInput.focus();
-      }
     },
     Write: async function goWritepage() {
       // await createRouter.push("/DiaryInsert.vue/"); //경로
@@ -285,10 +286,48 @@ export default {
       return selectedDate > today;
     },
     formatDate(date) {
-      // 주어진 날짜를 Date 객체로 변환합니다.
-      const parsedDate = new Date(date);
-      // 원하는 형식에 맞게 문자열로 변환합니다.
-      return parsedDate.toISOString().slice(0, 10).replace(/-/g, "");
+      const year = date.getFullYear();
+      let month = (1 + date.getMonth()).toString().padStart(2, "0");
+      let day = date.getDate().toString().padStart(2, "0");
+
+      return year + month + day;
+    },
+
+    formatDate2(date) {
+      const year = date.getFullYear();
+      let month = (1 + date.getMonth()).toString().padStart(2, "0");
+      let day = date.getDate().toString().padStart(2, "0");
+
+      return year + month + day;
+    },
+
+    reset() {
+      this.$router.push("/dashboard/diary/list");
+    },
+
+    valid() {
+      if (this.title == "") {
+        alert("제목을 입력해주세요.");
+        this.$refs.titleInput.focus();
+        return false;
+      }
+      if (this.weather == "") {
+        alert("날씨를 선택해주세요.");
+        return false;
+      }
+      if (this.idate == "") {
+        alert("날짜를 선택해주세요.");
+        return false;
+      }
+      if (this.mood == "") {
+        alert("기분을 선택해주세요.");
+        return false;
+      }
+      if (this.state.content == "") {
+        alert("내용을 입력해주세요.");
+        return false;
+      }
+      return true;
     },
   },
 };

@@ -2,6 +2,16 @@
   <div style="height: 700px">
     <el-row type="flex" justify="center" class="list-main">
       <el-col :span="16">
+        <div style="height: 50px">
+          <span style="font-size: 20px"> Today's Weather : </span>
+          <img
+            v-if="iconUrl"
+            :src="iconUrl"
+            alt="Weather Icon"
+            style="height: 50px; width: 50px"
+          />
+          <span style="font-size: 30px">{{ weather }}</span>
+        </div>
         <!--리스트형,카드형,작성 검색 영역  -->
         <el-row>
           <!-- 작성(Write)로 이동 -->
@@ -18,7 +28,7 @@
 
             <!-- 작성 버튼 -->
             <el-button @click="write" circle
-              ><el-icon :size="size" :color="color"> <Edit /> </el-icon
+              ><el-icon> <Edit /> </el-icon
             ></el-button>
           </el-col>
 
@@ -30,7 +40,6 @@
               v-model="search"
               ref="searchInput"
               placeholder="검색"
-              size="small"
               @keyup.enter="list()"
             />
             <!-- 클리어 아이콘 -->
@@ -149,9 +158,13 @@ export default {
       search: "",
       loginId: "",
       action: "",
+      weather: "",
+      iconCode: "",
+      iconUrl: "",
     };
   },
   mounted() {
+    this.getWeather();
     this.list();
     let loginInfo = this.$store.state.loginInfo;
     this.loginId = loginInfo.loginId;
@@ -249,6 +262,25 @@ export default {
             console.error("Error deleting diary:", error);
           });
       }
+    },
+
+    getWeather() {
+      const apiKey = "a336f06a784cfd11b597e2efd6109bcc";
+      const city = "Seoul"; // 도시 이름 예시
+      const url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
+
+      this.axios
+        .get(url)
+        .then((response) => {
+          console.log(response);
+          this.weather = response.data.weather[0].main;
+          this.iconCode = response.data.weather[0].icon;
+
+          this.iconUrl = `http://openweathermap.org/img/wn/${this.iconCode}.png`;
+        })
+        .catch((error) => {
+          console.error("날씨 정보를 가져오는데 실패했습니다.", error);
+        });
     },
   },
 };
