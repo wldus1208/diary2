@@ -4,8 +4,9 @@ import Login from "../views/user/Login.vue";
 import store from "../store/index.js";
 
 const checkAuthed = function (to, from, next) {
-  // console.log(store.state);
-  // console.log(to);
+  console.log(from);
+  console.log(to);
+  console.log(next);
   if (store.state.loginInfo == null) {
     alert("로그인이 필요합니다");
     return next("/");

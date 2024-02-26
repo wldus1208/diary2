@@ -111,6 +111,10 @@ export default {
     showSocialLoginModal() {
       console.log("클릭");
       if (this.$refs.SocialLoginModal) {
+        console.log(
+          "this.$refs.SocialLoginModal : ",
+          this.$refs.SocialLoginModal
+        );
         this.$refs.SocialLoginModal.showModal();
       }
     },
