@@ -85,8 +85,21 @@ export default {
     },
 
     logoutproc() {
+      console.table(
+        "this.$session.get('type') : ",
+        this.$session.get("loginType")
+      );
+      // let params = new URLSearchParams();
+      // params.append("type", this.sch_title);
+
+      let url = "";
+      if (this.$session.get("loginType") != "naver") {
+        url = "/api/logout";
+      } else if (this.$session.get("loginType") == "naver") {
+        url = "/api/logout/naver";
+      }
       this.axios
-        .post("/api/logout")
+        .post(url)
         .then(() => {
           alert("로그아웃 되었습니다.");
           // Vuex 상태 초기화 또는 사용자 인증 관련 데이터 제거
@@ -113,6 +126,17 @@ export default {
             // 네이버로 로그인하지 않았다면, 일반적인 로그아웃 후 홈으로 리다이렉트
             this.$router.push("/");
           }
+
+          // // 네이버 로그인 상태 확인 후 네이버 로그아웃 처리
+          // if (this.$store.state.isNaverLoggedIn) {
+          //   // window.location.href = "https://nid.naver.com/nidlogin.logout";
+          //   // 네이버 로그아웃 후의 리다이렉트 처리는 네이버 로그아웃 페이지에서 설정
+          // } else {
+          //   // 네이버로 로그인하지 않았다면, 일반적인 로그아웃 후 홈으로 리다이렉트
+          //   this.$router.push("/");
+          // }
+
+          this.$router.push("/");
         })
         .catch((error) => {
           console.error("로그아웃 처리 중 에러 발생", error);

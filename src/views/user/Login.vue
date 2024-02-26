@@ -178,6 +178,7 @@ export default {
               this.$session.set("userType", resp.data.userType);
               this.$session.set("serverName", resp.data.serverName);
               this.$session.set("usrMnuAtrt", resp.data.usrMnuAtrt);
+              this.$session.set("loginType", "id");
 
               vm.$router.push("/dashboard/home");
             } else {
