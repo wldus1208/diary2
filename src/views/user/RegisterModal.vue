@@ -34,6 +34,26 @@
             v-model="userForm.name"
             required
           />
+          <div class="form-group">
+            <label for="email">이메일</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              v-model="userForm.email"
+              required
+            />
+            <!-- 이메일 중복 검사 메시지 표시 -->
+            <p
+              v-if="emailDuplicateCheckMessage"
+              :class="{
+                'error-message': isEmailDuplicate,
+                'success-message': !isEmailDuplicate,
+              }"
+            >
+              {{ emailDuplicateCheckMessage }}
+            </p>
+          </div>
         </div>
         <div class="form-group">
           <label for="password">비밀번호</label>
@@ -45,6 +65,7 @@
             required
           />
         </div>
+
         <!-- 연락처 입력 필드 -->
         <div class="form-group">
           <label for="hp">연락처</label>
@@ -118,17 +139,19 @@ export default {
       verificationCodeTimeout: null, // 인증번호 만료 타이머 ID
       isUserIdDuplicate: false, //중복검사 상태
       userIdDuplicateCheckMessage: "", //중복검사 메세지
+      emailDuplicateCheckMessage: "", // 이메일 중복 검사 결과 메시지
+      isEmailDuplicate: false, // 이메일 중복 여부
+      emailFormatValid: true, // 이메일 형식 유효성 상태
       // 폼 데이터를 위한 데이터 모델 추가
       userForm: {
         loginID: "",
         name: "",
+        email: "",
         password: "",
         hp: "",
         naver: "N",
         google: "N",
         kakao: "N",
-
-        // email: "",
       },
       props: {
         name: String,
@@ -143,6 +166,9 @@ export default {
   watch: {
     "userForm.loginID": function (newValue) {
       this.checkUserIdDuplicate(newValue);
+    },
+    "userForm.email"(newValue) {
+      this.checkEmailDuplicate(newValue);
     },
   },
   methods: {
@@ -159,6 +185,9 @@ export default {
         password: "",
         hp: "",
         email: "",
+        naver: "N",
+        google: "N",
+        kakao: "N",
       };
 
       // 모든 상태 초기화
@@ -174,10 +203,10 @@ export default {
       this.verificationCodeTimeout = null;
       this.timer = null;
     },
-    // 중복 검사
+    //아이디 중복 검사
     checkUserIdDuplicate(loginID) {
       console.log("입력한 값 : ", loginID);
-      if (!loginID) {
+      if (!loginID.trim()) {
         this.userIdDuplicateCheckMessage = "";
         return;
       }
@@ -199,6 +228,47 @@ export default {
           console.error("아이디 중복 확인 중 오류 발생:", error);
         });
     },
+    // 이메일 형식 검증
+    validateEmailFormat(email) {
+      const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      this.emailFormatValid = pattern.test(email);
+      return this.emailFormatValid; // 이메일 형식이 유효한지 여부 반환
+    },
+    // 이메일 중복 검사
+    checkEmailDuplicate(email) {
+      // 입력값이 비었을 경우 메시지를 초기화하고 함수를 종료한다.
+      if (!email.trim()) {
+        this.isEmailDuplicate = false; // 중복 상태 초기화
+        this.emailDuplicateCheckMessage = ""; // 메시지 초기화
+        return; // 함수 종료
+      }
+
+      // 이메일 형식 검증
+      if (!this.validateEmailFormat(email)) {
+        this.isEmailDuplicate = true;
+        this.emailDuplicateCheckMessage = "유효하지 않은 이메일 형식입니다.";
+        return; // 이메일 형식이 유효하지 않으면 중복 검사를 수행하지 않는다.
+      }
+
+      // 이메일 형식이 유효하면 중복 검사를 수행한다.
+      axios
+        .post("/api/checkEmail", { email: email })
+        .then((response) => {
+          // 중복 검사 결과 처리
+          if (response.data) {
+            this.isEmailDuplicate = true;
+            this.emailDuplicateCheckMessage = "이미 사용 중인 이메일입니다.";
+          } else {
+            this.isEmailDuplicate = false;
+            this.emailDuplicateCheckMessage = "사용 가능한 이메일입니다.";
+          }
+        })
+        .catch((error) => {
+          console.error("이메일 중복 확인 중 오류 발생:", error);
+          this.emailDuplicateCheckMessage = "중복 검사 중 오류가 발생했습니다.";
+        });
+    },
+
     // 휴대폰 인증
     requestVerificationCode() {
       // 연락처 입력값이 11자리인지 확인
@@ -397,6 +467,7 @@ h1 {
 }
 
 /* 입력 필드 스타일 */
+input[type="email"],
 input[type="text"],
 input[type="password"] {
   width: calc(100% - 20px); /* 전체 너비에서 패딩 제외 */

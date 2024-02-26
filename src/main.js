@@ -75,4 +75,3 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 // - 제일 먼저 실행되는 js
 // - 프로젝트에서 필요한 게 있으면 main.js에서 공통적으로 사용할 수 있도록 import 해 주면 됨
 // - jsp 방식에서의 common_include.jsp file 과 동일한 기능이라 볼 수 있다.
-window.Kakao.init("104177c8f6e989a377a6f47e2be51760");

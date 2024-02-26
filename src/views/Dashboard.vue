@@ -85,17 +85,23 @@ export default {
     },
 
     logoutproc() {
-      // 백엔드 로그아웃 API 호출
       this.axios
         .post("/api/logout")
-
         .then(() => {
-          // Vuex 상태 초기화 또는 사용자 인증 관련 데이터 제거
           alert("로그아웃 되었습니다.");
+          // Vuex 상태 초기화 또는 사용자 인증 관련 데이터 제거
           this.$store.dispatch("logout");
+          // 세션 스토리지 클리어 (vue-session 사용 시)
           this.$session.clear();
-          this.$router.push("/");
-          console.log("로그아웃 성공" + this.loginInfo);
+
+          // 네이버 로그인 상태 확인 후 네이버 로그아웃 처리
+          if (this.$store.state.isNaverLoggedIn) {
+            window.location.href = "https://nid.naver.com/nidlogin.logout";
+            // 네이버 로그아웃 후의 리다이렉트 처리는 네이버 로그아웃 페이지에서 설정
+          } else {
+            // 네이버로 로그인하지 않았다면, 일반적인 로그아웃 후 홈으로 리다이렉트
+            this.$router.push("/");
+          }
         })
         .catch((error) => {
           console.error("로그아웃 처리 중 에러 발생", error);
