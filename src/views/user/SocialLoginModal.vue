@@ -55,6 +55,8 @@ export default {
     this.state = urlParams.get("state");
     console.log("인증 코드 전송: ", this.code);
     console.log("인증 상태 전송: ", this.state);
+    window.Kakao.init("81900552da7c05acef6a1d7bfc7b42a1");
+    console.log(window.Kakao.isInitialized() ? "초기화 성공" : "초기화 실패");
 
     if (this.code && this.state) {
       this.sendCodeToBackend(this.code, this.state);
@@ -62,29 +64,52 @@ export default {
   },
 
   methods: {
-    // 카카오 로그인
+    //카카오 로그인
     kakaoLogin() {
       window.Kakao.Auth.login({
-        scope: "profile_image, account_email",
-        success: this.getKakaoAccount,
-      });
-    },
-    getKakaoAccount() {
-      window.Kakao.API.request({
-        url: "http://localhost:8080",
-        success: (res) => {
-          const kakao_account = res.kakao_account;
-          const ninkname = kakao_account.profile.ninkname;
-          const email = kakao_account.email;
-          console.log("ninkname", ninkname);
-          console.log("email", email);
+        success: (authObj) => {
+          console.log("카카오 로그인 성공", authObj);
 
-          //로그인처리구현
+          window.Kakao.API.request({
+            url: "/v2/user/me",
+            success: (res) => {
+              console.log("사용자 정보 요청 성공", res);
+              var email = res.kakao_account.email;
+              var name = res.properties.nickname;
+              console.log("name : ", name);
 
-          alert("로그인 성공!");
+              console.log("카카오에서 받은 이메일", email);
+
+              this.axios
+                .get("/api/auth/kakao", {
+                  params: {
+                    email: email,
+                  },
+                })
+                .then((response) => {
+                  console.log("백엔드로부터의 응답:", response);
+                  if (response.data === 0) {
+                    alert("회원가입 후 이용해주세요.");
+                    var kakao = "Y";
+
+                    console.log(kakao);
+                    // 회원가입 모달을 표시
+                    this.showRegisterModal(email, name, "", "kakao"); // 카카오 로그인 정보 전달
+                  } else {
+                    this.loginWithEmail(email);
+                  }
+                })
+                .catch((error) => {
+                  console.error("백엔드 서버 통신 실패:", error);
+                });
+            },
+            fail: (error) => {
+              console.error("사용자 정보 요청 실패", error);
+            },
+          });
         },
-        fail: (error) => {
-          console.log(error);
+        fail: (err) => {
+          console.error("카카오 로그인 실패", err);
         },
       });
     },
@@ -138,16 +163,19 @@ export default {
           if (response.data.login_result === 0) {
             alert("화원가입 후 이용해주세요");
             // 모달에 이름과 전화번호를 설정하고 표시
-            this.showRegisterModal(
-              response.data.name,
-              response.data.mobile,
-              response.data.naver
-            );
+
+            var email = response.data.email;
+            var name = response.data.name;
+            var phoneNumber = response.data.mobile;
+            // 카카오 로그인 정보 전달
+            this.showRegisterModal(email, name, phoneNumber, "naver"); // 카카오 로그인 정보 전달
           } else {
             // 회원가입이 필요 없는 경우 (즉, 이미 회원인 경우)
             // 휴대폰 번호로 회원 정보 조회 및 로그인 처리
-            const phoneNumber = response.data.mobile.replace(/-/g, ""); // 하이픈 제거
-            this.loginWithPhoneNumber(phoneNumber);
+            //const phoneNumber = response.data.mobile.replace(/-/g, ""); // 하이픈 제거
+            //이메일을 이용해서 사용자 정보 확인
+            const email = response.data.email;
+            this.loginWithEmail(email);
           }
         })
         .catch((error) => {
@@ -156,73 +184,85 @@ export default {
         });
     },
 
-    // 휴대폰 번호로 로그인 처리하는 메소드
-    loginWithPhoneNumber(phoneNumber) {
-      this.axios
-        .post("/api/login", { hp: phoneNumber })
-        .then((loginResponse) => {
-          console.log("loginResponse : ", loginResponse);
-          if (loginResponse.status == 200) {
-            // loginproc.do
-            this.axios
-              .post(
-                "/loginProc.do",
-                new URLSearchParams({
-                  lgn_Id: loginResponse.data.loginID,
-                  pwd: loginResponse.data.password,
-                })
-              )
-              .then((resp) => {
-                let data = resp.data;
-                console.log("data : ", data);
-                if (data.result == "SUCCESS") {
-                  this.$store.commit("logged", {
-                    loginId: data.loginId,
-                    userNm: data.userNm,
-                    userType: data.userType,
-                    serverName: data.serverName,
-                    usrMnuAtrt: data.usrMnuAtrt,
-                  });
-                  this.$store.commit("auth", { type: data.userType });
-
-                  // guide for making vue files
-                  data.usrMnuAtrt.forEach(function (item) {
-                    console.log(item.mnu_nm);
-                    item.nodeList.forEach(function (item) {
-                      let purl = item.mnu_url.replace(".do", ".vue");
-                      let vueFilePath = "@/views" + purl;
-                      console.log(
-                        "  메뉴명: " +
-                          item.mnu_nm +
-                          " || 파일경로 : " +
-                          vueFilePath
-                      );
-                    });
-                  });
-                  ////////////////////////////////
-
-                  this.$router.push("/dashboard/home");
-                } else {
-                  if (data.resultMsg.indexOf("회원가입") > -1)
-                    alert(data.resultMsg);
-                  else alert("ID 혹은 비밀번호가 틀립니다");
-                }
+    // 이메일 로그인 처리하는 메소드
+    loginWithEmail(email) {
+      this.axios.post("/api/login", { email }).then((loginResponse) => {
+        console.log("loginResponse : ", loginResponse);
+        if (loginResponse.status == 200) {
+          // loginproc.do
+          this.axios
+            .post(
+              "/loginProc.do",
+              new URLSearchParams({
+                lgn_Id: loginResponse.data.loginID,
+                pwd: loginResponse.data.password,
               })
-              .catch((error) => {
-                console.log(error);
-              });
-          }
-        });
+            )
+            .then((resp) => {
+              let data = resp.data;
+              console.log("data : ", data);
+              if (data.result == "SUCCESS") {
+                this.$store.commit("logged", {
+                  loginId: data.loginId,
+                  userNm: data.userNm,
+                  userType: data.userType,
+                  serverName: data.serverName,
+                  usrMnuAtrt: data.usrMnuAtrt,
+                });
+                this.$store.commit("auth", { type: data.userType });
+
+                // guide for making vue files
+                data.usrMnuAtrt.forEach(function (item) {
+                  console.log(item.mnu_nm);
+                  item.nodeList.forEach(function (item) {
+                    let purl = item.mnu_url.replace(".do", ".vue");
+                    let vueFilePath = "@/views" + purl;
+                    console.log(
+                      "  메뉴명: " +
+                        item.mnu_nm +
+                        " || 파일경로 : " +
+                        vueFilePath
+                    );
+                  });
+                });
+                ////////////////////////////////
+
+                this.$router.push("/dashboard/home");
+              } else {
+                if (data.resultMsg.indexOf("회원가입") > -1)
+                  alert(data.resultMsg);
+                else alert("ID 혹은 비밀번호가 틀립니다");
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
+      });
     },
 
     // 모달 표시 메서드
-    showRegisterModal(name, phoneNumber, naver) {
+    showRegisterModal(
+      email = "",
+      name = "",
+      phoneNumber = "",
+      socialType = ""
+    ) {
       if (this.$refs.registerModal) {
-        // 휴대폰 번호에서 하이픈 제거
-        const cleanPhoneNumber = phoneNumber.replace(/-/g, "");
+        this.$refs.registerModal.userForm.email = email;
         this.$refs.registerModal.userForm.name = name;
-        this.$refs.registerModal.userForm.naver = naver;
-        this.$refs.registerModal.userForm.hp = cleanPhoneNumber;
+        this.$refs.registerModal.userForm.phoneNumber = phoneNumber.replace(
+          /-/g,
+          ""
+        );
+        // 각 소셜 로그인 타입에 따라 "Y" 값을 설정
+        if (socialType === "kakao") {
+          this.$refs.registerModal.userForm.kakao = "Y";
+        } else if (socialType === "naver") {
+          this.$refs.registerModal.userForm.naver = "Y";
+        } else if (socialType === "google") {
+          this.$refs.registerModal.userForm.google = "Y";
+        }
         this.$refs.registerModal.showModal();
       }
     },
