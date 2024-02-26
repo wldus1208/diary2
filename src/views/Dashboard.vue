@@ -107,6 +107,26 @@ export default {
           // 세션 스토리지 클리어 (vue-session 사용 시)
           this.$session.clear();
 
+          // 네이버 로그인 상태 확인 후 네이버 로그아웃 처리
+          if (this.$store.state.isNaverLoggedIn) {
+            console.log("@@@@@@@@@@@@@@@@@", this.$store.state.isNaverLoggedIn);
+            //window.location.href = "https://nid.naver.com/nidlogin.logout";
+          }
+
+          // 네이버 로그아웃 후의 리다이렉트 처리는 네이버 로그아웃 페이지에서 설정
+          else if (this.$store.state.isKakaoLoggedIn) {
+            if (!window.Kakao.Auth.getAccessToken()) {
+              console.log("Not logged in.");
+              return;
+            }
+            window.Kakao.Auth.logout(function () {
+              alert("로그아웃 되었습니다.");
+            });
+          } else {
+            // 네이버로 로그인하지 않았다면, 일반적인 로그아웃 후 홈으로 리다이렉트
+            this.$router.push("/");
+          }
+
           // // 네이버 로그인 상태 확인 후 네이버 로그아웃 처리
           // if (this.$store.state.isNaverLoggedIn) {
           //   // window.location.href = "https://nid.naver.com/nidlogin.logout";

@@ -1,7 +1,7 @@
-import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Dashboard.vue";
 import Login from "../views/user/Login.vue";
 import store from "../store/index.js";
+import { createRouter, createWebHashHistory } from "vue-router";
 
 const checkAuthed = function (to, from, next) {
   console.log(from);
@@ -63,12 +63,21 @@ const routes = [
     path: "/",
     name: "login",
     component: Login,
+    beforeEnter: (to, from, next) => {
+      // 직접 스토어의 상태를 확인합니다.
+      if (store.state.loginInfo != null) {
+        alert("로그인 페이지는 로그아웃 후 이용 가능합니다.");
+        next("/dashboard/home");
+      } else {
+        next();
+      }
+    },
   },
 ];
 
 // 라우터 생성
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL), // 해시 모드 대신 히스토리 모드 사용
+  history: createWebHashHistory(process.env.BASE_URL), // 해시 모드 대신 히스토리 모드 사용
   routes,
   methods: { checkAuthed },
 });
