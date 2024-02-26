@@ -69,6 +69,7 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL), // 해시 모드 대신 히스토리 모드 사용
   routes,
+  methods: { checkAuthed },
 });
 
 export default router;
