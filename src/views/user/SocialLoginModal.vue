@@ -55,8 +55,11 @@ export default {
     this.state = urlParams.get("state");
     console.log("인증 코드 전송: ", this.code);
     console.log("인증 상태 전송: ", this.state);
-    window.Kakao.init("81900552da7c05acef6a1d7bfc7b42a1");
-    console.log(window.Kakao.isInitialized() ? "초기화 성공" : "초기화 실패");
+
+    if (!window.Kakao.isInitialized()) {
+      window.Kakao.init("81900552da7c05acef6a1d7bfc7b42a1");
+      console.log(window.Kakao.isInitialized() ? "초기화 성공" : "초기화 실패");
+    }
 
     if (this.code && this.state) {
       this.sendCodeToBackend(this.code, this.state);
@@ -96,6 +99,7 @@ export default {
                     // 회원가입 모달을 표시
                     this.showRegisterModal(email, name, "", "kakao"); // 카카오 로그인 정보 전달
                   } else {
+                    this.$session.set("loginType", "kakao");
                     this.loginWithEmail(email);
                   }
                 })
@@ -174,6 +178,7 @@ export default {
             // 휴대폰 번호로 회원 정보 조회 및 로그인 처리
             //const phoneNumber = response.data.mobile.replace(/-/g, ""); // 하이픈 제거
             //이메일을 이용해서 사용자 정보 확인
+            this.$session.set("loginType", "naver");
             const email = response.data.email;
             this.loginWithEmail(email);
           }
